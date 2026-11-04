@@ -1,0 +1,14 @@
+# C++ style of mod/ (clang-format 17+). Generated headers (ap_icon.h, ap_emblem.h,
+# ap_screamer.h) and mod/extern are not formatted: see build.ps1 -Format.
+BasedOnStyle: Google
+IndentWidth: 4
+ColumnLimit: 120
+AccessModifierOffset: -4
+DerivePointerAlignment: false
+PointerAlignment: Left
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: WithoutElse
+AllowShortLoopsOnASingleLine: true
+AllowShortLambdasOnASingleLine: All
+IncludeBlocks: Preserve
+SortIncludes: CaseSensitive

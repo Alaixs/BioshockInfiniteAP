@@ -1,0 +1,52 @@
+# Python tooling only: the apworld is packaged by apworld/build.py, not by this file.
+[tool.ruff]
+line-length = 120
+# Oldest Python supported: Archipelago 0.6.7 and the dev tools need 3.11.
+target-version = "py311"
+# Tables written by tools/: regenerate them instead of editing or formatting them.
+extend-exclude = [
+    "apworld/bioshock_infinite/checkpoints.py",
+    "apworld/bioshock_infinite/gear.py",
+    "apworld/bioshock_infinite/infusions.py",
+    "apworld/bioshock_infinite/machines.py",
+    "apworld/bioshock_infinite/upgrades.py",
+    "apworld/bioshock_infinite/voxophones.py",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["B905"]  # zip() without strict=: several zips pair lists of different lengths on purpose
+
+[tool.ruff.lint.isort]
+known-first-party = ["BaseClasses", "Fill", "Options", "test", "worlds", "upk", "game", "catalog_voxophones", "catalog_infusions", "make_icon"]
+
+[tool.ruff.format]
+quote-style = "preserve"
+
+# Spell check (typos, run by pre-commit). It only reports: a wrong "fix" of a game identifier
+# breaks the mod, so every correction is made by hand.
+[tool.typos.files]
+# Tables generated from the game's files: names as the game spells them.
+extend-exclude = [
+    "apworld/bioshock_infinite/checkpoints.py",
+    "apworld/bioshock_infinite/gear.py",
+    "apworld/bioshock_infinite/infusions.py",
+    "apworld/bioshock_infinite/machines.py",
+    "apworld/bioshock_infinite/upgrades.py",
+    "apworld/bioshock_infinite/voxophones.py",
+    "tools/vending_catalog.json",
+]
+
+[tool.typos.default]
+# Wide strings are the in-game texts, translated into the game's five languages.
+extend-ignore-re = ['L"(?:[^"\\]|\\.)*"']
+
+[tool.typos.default.extend-words]
+ue = "ue"        # Unreal Engine 3 (namespace ue3)
+parms = "parms"  # Unreal's name for a function's parameter block
+clik = "clik"    # Scaleform CLIK, the game's UI framework (XClikWidget...)
+
+[tool.typos.default.extend-identifiers]
+# Misspelled by the game itself.
+BW_SkyhookSeige = "BW_SkyhookSeige"
+S_CHU_LizTower_Gam = "S_CHU_LizTower_Gam"

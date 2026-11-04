@@ -1,0 +1,67 @@
+# Checks run on every commit (after `pre-commit install`) and by the CI on every file:
+#   pre-commit run --all-files
+# Formatters fix the files they touch: review the changes and commit again.
+# Update the hooks with `pre-commit autoupdate`, but keep clang-format on 17 (the version
+# Visual Studio 2022 ships, so its format-on-save gives the same result).
+default_install_hook_types: [pre-commit, commit-msg]
+default_stages: [pre-commit, manual]
+# Third-party code stays as published; generated headers are rewritten by tools/make_*.py.
+exclude: ^mod/extern/|^mod/src/ap_(icon|emblem|screamer)\.h$
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        args: [--maxkb=2048]  # the source images; game packages (tens of MB) never get in
+      - id: check-case-conflict
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-yaml
+      - id: debug-statements
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: fix-byte-order-marker
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v17.0.6
+    hooks:
+      - id: clang-format
+        types_or: [c, c++]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.3
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.52.0
+    hooks:
+      - id: typos
+        args: [--force-exclude]  # report only: never rewrite a game identifier
+
+  - repo: https://github.com/Mateusz-Grzelinski/actionlint-py
+    rev: v1.7.12.25
+    hooks:
+      - id: actionlint
+
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.5.0
+    hooks:
+      - id: conventional-pre-commit
+
+  - repo: local
+    hooks:
+      - id: no-local-paths
+        name: no paths from a personal machine
+        description: The repo is public; tools find the game and Archipelago by themselves.
+        language: pygrep
+        entry: '(?i)\b[a-z]:[\\/]+users[\\/]+\w|/home/\w|/Users/\w'
+        exclude: ^\.pre-commit-config\.yaml$
