@@ -1,0 +1,46 @@
+# Build output (CMake / Visual Studio, apworld package, release staging)
+mod/build/
+mod/bin/
+apworld/build/
+dist/
+*.apworld
+*.obj
+*.pdb
+*.ilk
+*.exp
+*.tlog
+
+# Python caches and virtual environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Local Archipelago checkout at the root (as in the CI) and generated seeds. Anchored: on Windows
+# the pattern would also hide .github/actions/archipelago.
+/Archipelago/
+AP_*.zip
+
+# Never commit the game's files
+*.xxx
+*.upk
+
+# Editors and personal assistant settings
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+.claude/settings.local.json
+
+# OS
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Files written next to the DLL when playing or testing
+*.log
+BioShockAP.ini
+BioShockAP_state.json*
