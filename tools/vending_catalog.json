@@ -1,0 +1,1276 @@
+[
+  {
+    "package": "S_BW_Hotel_CourtYard_Geo",
+    "path": "S_BW_Hotel_CourtYard_Geo.TheWorld.PersistentLevel.XVendingMachine_3",
+    "archetype": "VendingMachine_Boardwalk_DoNotPlace_Arc0",
+    "kind": "Minuteman's Armory",
+    "location": [
+      40112.7,
+      -123108.8,
+      6683.4
+    ],
+    "yaw": 0,
+    "world": "S_BW3_P"
+  },
+  {
+    "package": "S_BW_Hotel_in_Geo",
+    "path": "S_BW_Hotel_in_Geo.TheWorld.PersistentLevel.XVendingMachine_0",
+    "archetype": "SP_VigorVending_Boardwalk_Entry",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      42976.0,
+      -74008.0,
+      8168.0
+    ],
+    "yaw": 32768,
+    "world": "S_BW3_P"
+  },
+  {
+    "package": "S_BW_Hotel_in_Geo",
+    "path": "S_BW_Hotel_in_Geo.TheWorld.PersistentLevel.XVendingMachine_2",
+    "archetype": "SP_Vending_Boardwalk_Final",
+    "kind": "Minuteman's Armory",
+    "location": [
+      38096.0,
+      -74000.0,
+      8168.0
+    ],
+    "yaw": 0,
+    "world": "S_BW3_P"
+  },
+  {
+    "package": "S_BW_Hotel_out_Geo",
+    "path": "S_BW_Hotel_out_Geo.TheWorld.PersistentLevel.XVendingMachine_1",
+    "archetype": "SP_Vending_Boardwalk_Final",
+    "kind": "Minuteman's Armory",
+    "location": [
+      39736.4,
+      -82842.1,
+      8168.1
+    ],
+    "yaw": -8192,
+    "world": "S_BW3_P"
+  },
+  {
+    "package": "S_BW_Hotel_out_Geo",
+    "path": "S_BW_Hotel_out_Geo.TheWorld.PersistentLevel.XVendingMachine_2",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      43199.9,
+      -82834.7,
+      8168.0
+    ],
+    "yaw": 40960,
+    "world": "S_BW3_P"
+  },
+  {
+    "package": "S_BW_Hotel_Shop_Geo",
+    "path": "S_BW_Hotel_Shop_Geo.TheWorld.PersistentLevel.XVendingMachine_0",
+    "archetype": "SP_Vending_Boardwalk_Final",
+    "kind": "Minuteman's Armory",
+    "location": [
+      42388.0,
+      -126160.0,
+      6680.0
+    ],
+    "yaw": -32768,
+    "world": "S_BW3_P"
+  },
+  {
+    "package": "S_BW_Hotel_Shop_Geo",
+    "path": "S_BW_Hotel_Shop_Geo.TheWorld.PersistentLevel.XVendingMachine_1",
+    "archetype": "SP_VigorVending_Boardwalk_Final",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      40398.0,
+      -126168.0,
+      6680.0
+    ],
+    "yaw": 0,
+    "world": "S_BW3_P"
+  },
+  {
+    "package": "S_BW_Madison_Detail",
+    "path": "S_BW_Madison_Detail.TheWorld.PersistentLevel.XVendingMachine_0",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      45766.0,
+      -65196.0,
+      7290.0
+    ],
+    "yaw": 32768,
+    "world": "S_BW2_P"
+  },
+  {
+    "package": "S_BW_Middletown_A_Game",
+    "path": "S_BW_Middletown_A_Game.TheWorld.PersistentLevel.XVendingMachine_2",
+    "archetype": "SP_VigorVending_Boardwalk_Entry",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      49827.4,
+      -8306.1,
+      -957.1
+    ],
+    "yaw": 44032,
+    "world": "?"
+  },
+  {
+    "package": "S_BW_Middletown_B_Game2",
+    "path": "S_BW_Middletown_B_Game2.TheWorld.PersistentLevel.XVendingMachine_1",
+    "archetype": "SP_VigorVending_Boardwalk_Final",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      49821.7,
+      -8316.0,
+      -956.0
+    ],
+    "yaw": -21504,
+    "world": "?"
+  },
+  {
+    "package": "S_BW_Middletown_Geo",
+    "path": "S_BW_Middletown_Geo.TheWorld.PersistentLevel.XVendingMachine_0",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      46476.2,
+      -5634.2,
+      -1408.0
+    ],
+    "yaw": -21504,
+    "world": "S_BW2_P"
+  },
+  {
+    "package": "S_BW_Sherman_Loot",
+    "path": "S_BW_Sherman_Loot.TheWorld.PersistentLevel.XVendingMachine_2",
+    "archetype": "SP_ConsumableVendingMachine_BWCoinToss",
+    "kind": "Dollar Bill",
+    "location": [
+      102023.2,
+      -6433.4,
+      -16688.0
+    ],
+    "yaw": 10976,
+    "world": "S_BW_P"
+  },
+  {
+    "package": "S_BW_Sherman_Out_Loot",
+    "path": "S_BW_Sherman_Out_Loot.TheWorld.PersistentLevel.XVendingMachine_4",
+    "archetype": "SP_Vending_Boardwalk_Entry",
+    "kind": "Minuteman's Armory",
+    "location": [
+      60629.8,
+      -3706.2,
+      -1531.9
+    ],
+    "yaw": 16384,
+    "world": "S_BW2_P"
+  },
+  {
+    "package": "S_BW_Skyhook_Game",
+    "path": "S_BW_Skyhook_Game.TheWorld.PersistentLevel.XVendingMachine_0",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      37122.0,
+      -26946.0,
+      -6528.0
+    ],
+    "yaw": 16384,
+    "world": "S_BW2_P"
+  },
+  {
+    "package": "S_BW_SkyroadWaiting_Geo",
+    "path": "S_BW_SkyroadWaiting_Geo.TheWorld.PersistentLevel.XVendingMachine_8",
+    "archetype": "SP_Vending_Boardwalk_Final",
+    "kind": "Minuteman's Armory",
+    "location": [
+      49424.0,
+      -30568.0,
+      -6400.0
+    ],
+    "yaw": 16384,
+    "world": "S_BW2_P"
+  },
+  {
+    "package": "S_BW_Wonder_Game",
+    "path": "S_BW_Wonder_Game.TheWorld.PersistentLevel.XVendingMachine_0",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      16489.7,
+      19567.4,
+      4256.0
+    ],
+    "yaw": -40960,
+    "world": "S_BW2_P"
+  },
+  {
+    "package": "S_BW_Wonder_Game",
+    "path": "S_BW_Wonder_Game.TheWorld.PersistentLevel.XVendingMachine_5",
+    "archetype": "SP_VigorVending_Boardwalk_Final",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      18234.6,
+      20522.4,
+      4256.0
+    ],
+    "yaw": 40960,
+    "world": "S_BW2_P"
+  },
+  {
+    "package": "S_BW_Wonder_Game",
+    "path": "S_BW_Wonder_Game.TheWorld.PersistentLevel.XVendingMachine_6",
+    "archetype": "SP_Vending_Boardwalk_Final",
+    "kind": "Minuteman's Armory",
+    "location": [
+      15562.9,
+      17797.4,
+      4256.0
+    ],
+    "yaw": 8192,
+    "world": "S_BW2_P"
+  },
+  {
+    "package": "S_CHU_BigZeppelin_Deck1_Loot",
+    "path": "S_CHU_BigZeppelin_Deck1_Loot.TheWorld.PersistentLevel.XVendingMachine_0",
+    "archetype": "SP_Vending_Church",
+    "kind": "Minuteman's Armory",
+    "location": [
+      -5866.0,
+      -6001.1,
+      -188.0
+    ],
+    "yaw": -32768,
+    "world": "S_CHU_P"
+  },
+  {
+    "package": "S_CHU_BigZeppelin_Deck1_Loot",
+    "path": "S_CHU_BigZeppelin_Deck1_Loot.TheWorld.PersistentLevel.XVendingMachine_1",
+    "archetype": "SP_VigorVending_Church",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      -5861.3,
+      -939.9,
+      -181.2
+    ],
+    "yaw": 32768,
+    "world": "S_CHU_P"
+  },
+  {
+    "package": "S_CHU_BigZeppelin_Deck2_Loot",
+    "path": "S_CHU_BigZeppelin_Deck2_Loot.TheWorld.PersistentLevel.XVendingMachine_2",
+    "archetype": "SP_VigorVending_Church",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      -2536.0,
+      -2787.0,
+      2312.0
+    ],
+    "yaw": -32768,
+    "world": "S_CHU_P"
+  },
+  {
+    "package": "S_CHU_BigZeppelin_Deck2_Loot",
+    "path": "S_CHU_BigZeppelin_Deck2_Loot.TheWorld.PersistentLevel.XVendingMachine_5",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      -2542.0,
+      -3836.0,
+      2312.0
+    ],
+    "yaw": -32768,
+    "world": "S_CHU_P"
+  },
+  {
+    "package": "S_CHU_BigZeppelin_Deck3_Loot",
+    "path": "S_CHU_BigZeppelin_Deck3_Loot.TheWorld.PersistentLevel.XVendingMachine_6",
+    "archetype": "SP_Vending_Church",
+    "kind": "Minuteman's Armory",
+    "location": [
+      2614.0,
+      -1144.0,
+      6478.0
+    ],
+    "yaw": -32768,
+    "world": "S_CHU_P"
+  },
+  {
+    "package": "S_CHU_CHouse_inside",
+    "path": "S_CHU_CHouse_inside.TheWorld.PersistentLevel.XVendingMachine_1",
+    "archetype": "SP_Vending_Church",
+    "kind": "Minuteman's Armory",
+    "location": [
+      -102240.0,
+      -3376.0,
+      9744.0
+    ],
+    "yaw": -49152,
+    "world": "S_CHU_P"
+  },
+  {
+    "package": "S_CHU_Deck_Loot",
+    "path": "S_CHU_Deck_Loot.TheWorld.PersistentLevel.XVendingMachine_1",
+    "archetype": "SP_VigorVending_Church",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      -87476.0,
+      -5920.0,
+      10024.0
+    ],
+    "yaw": 16384,
+    "world": "S_CHU_P"
+  },
+  {
+    "package": "S_EMP_BankExt_Loot",
+    "path": "S_EMP_BankExt_Loot.TheWorld.PersistentLevel.XVendingMachine_0",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      3588.0,
+      27760.0,
+      -12876.0
+    ],
+    "yaw": 32768,
+    "world": "S_EMP2_P"
+  },
+  {
+    "package": "S_EMP_BankExt_Loot",
+    "path": "S_EMP_BankExt_Loot.TheWorld.PersistentLevel.XVendingMachine_6",
+    "archetype": "SP_Vending_Emporia_Final",
+    "kind": "Minuteman's Armory",
+    "location": [
+      -3202.0,
+      28052.0,
+      -12876.0
+    ],
+    "yaw": 0,
+    "world": "S_EMP2_P"
+  },
+  {
+    "package": "S_EMP_BankExt_Loot",
+    "path": "S_EMP_BankExt_Loot.TheWorld.PersistentLevel.XVendingMachine_7",
+    "archetype": "SP_VigorVending_Emporia_Final",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      -3208.0,
+      27592.0,
+      -12880.0
+    ],
+    "yaw": 0,
+    "world": "S_EMP2_P"
+  },
+  {
+    "package": "S_EMP_BankInt_Loot",
+    "path": "S_EMP_BankInt_Loot.TheWorld.PersistentLevel.XVendingMachine_0",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      11002.4,
+      28866.3,
+      -12352.0
+    ],
+    "yaw": 16384,
+    "world": "S_EMP2_P"
+  },
+  {
+    "package": "S_EMP_BookStore_Geo",
+    "path": "S_EMP_BookStore_Geo.TheWorld.PersistentLevel.XVendingMachine_2",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      -7770.0,
+      44353.0,
+      -11736.0
+    ],
+    "yaw": 16384,
+    "world": "S_EMP_P"
+  },
+  {
+    "package": "S_EMP_Manor_Fountain_Geo",
+    "path": "S_EMP_Manor_Fountain_Geo.TheWorld.PersistentLevel.XVendingMachine_1",
+    "archetype": "SP_Vending_Emporia_Entry",
+    "kind": "Minuteman's Armory",
+    "location": [
+      -19008.2,
+      126330.1,
+      -21761.1
+    ],
+    "yaw": -180244,
+    "world": "S_EMP_P"
+  },
+  {
+    "package": "S_EMP_ManorStation_Loot",
+    "path": "S_EMP_ManorStation_Loot.TheWorld.PersistentLevel.XVendingMachine_0",
+    "archetype": "SP_VigorVending_Emporia_Entry",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      -14740.0,
+      110054.0,
+      -20912.0
+    ],
+    "yaw": -49664,
+    "world": "S_EMP_P"
+  },
+  {
+    "package": "S_EMP_ManorStation_Loot",
+    "path": "S_EMP_ManorStation_Loot.TheWorld.PersistentLevel.XVendingMachine_5",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      -12690.0,
+      110013.0,
+      -20911.0
+    ],
+    "yaw": 16384,
+    "world": "S_EMP_P"
+  },
+  {
+    "package": "S_EMP_Market_Loot",
+    "path": "S_EMP_Market_Loot.TheWorld.PersistentLevel.XVendingMachine_0",
+    "archetype": "SP_Vending_Emporia_Final",
+    "kind": "Minuteman's Armory",
+    "location": [
+      18948.7,
+      43581.8,
+      -10402.5
+    ],
+    "yaw": -48356,
+    "world": "S_EMP2_P"
+  },
+  {
+    "package": "S_EMP_Market_Loot",
+    "path": "S_EMP_Market_Loot.TheWorld.PersistentLevel.XVendingMachine_1",
+    "archetype": "SP_VigorVending_Emporia_Final",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      20688.0,
+      45288.0,
+      -10408.0
+    ],
+    "yaw": 32768,
+    "world": "S_EMP2_P"
+  },
+  {
+    "package": "S_EMP_Market_Loot",
+    "path": "S_EMP_Market_Loot.TheWorld.PersistentLevel.XVendingMachine_2",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      20133.7,
+      44192.7,
+      -10408.0
+    ],
+    "yaw": 24576,
+    "world": "S_EMP2_P"
+  },
+  {
+    "package": "S_EMP_Mrkt2Park_Geo",
+    "path": "S_EMP_Mrkt2Park_Geo.TheWorld.PersistentLevel.XVendingMachine_3",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      27604.3,
+      44212.2,
+      -9312.0
+    ],
+    "yaw": 49152,
+    "world": "S_EMP2_P"
+  },
+  {
+    "package": "S_EMP_StationA_Loot",
+    "path": "S_EMP_StationA_Loot.TheWorld.PersistentLevel.XVendingMachine_0",
+    "archetype": "SP_Vending_Emporia_Entry",
+    "kind": "Minuteman's Armory",
+    "location": [
+      -6639.0,
+      74854.0,
+      -15448.0
+    ],
+    "yaw": 0,
+    "world": "S_EMP_P"
+  },
+  {
+    "package": "S_EMP_StationA_Loot",
+    "path": "S_EMP_StationA_Loot.TheWorld.PersistentLevel.XVendingMachine_1",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      -1848.0,
+      71478.0,
+      -15200.0
+    ],
+    "yaw": 32768,
+    "world": "S_EMP_P"
+  },
+  {
+    "package": "S_EMP_StationA_Loot",
+    "path": "S_EMP_StationA_Loot.TheWorld.PersistentLevel.XVendingMachine_2",
+    "archetype": "SP_VigorVending_Emporia_Entry",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      -13124.0,
+      69224.0,
+      -15424.0
+    ],
+    "yaw": -49152,
+    "world": "S_EMP_P"
+  },
+  {
+    "package": "S_EMP_StationA_Loot",
+    "path": "S_EMP_StationA_Loot.TheWorld.PersistentLevel.XVendingMachine_3",
+    "archetype": "SP_Vending_Emporia_Entry",
+    "kind": "Minuteman's Armory",
+    "location": [
+      -14280.0,
+      69256.0,
+      -15424.0
+    ],
+    "yaw": 16384,
+    "world": "S_EMP_P"
+  },
+  {
+    "package": "S_EMP_StationB_Loot",
+    "path": "S_EMP_StationB_Loot.TheWorld.PersistentLevel.XVendingMachine_0",
+    "archetype": "SP_Vending_Emporia_Entry",
+    "kind": "Minuteman's Armory",
+    "location": [
+      -528.0,
+      63088.0,
+      -14048.0
+    ],
+    "yaw": 32768,
+    "world": "S_EMP_P"
+  },
+  {
+    "package": "S_EMP_StationB_Loot",
+    "path": "S_EMP_StationB_Loot.TheWorld.PersistentLevel.XVendingMachine_3",
+    "archetype": "SP_VigorVending_Emporia_Entry",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      -7792.0,
+      47328.0,
+      -11736.0
+    ],
+    "yaw": 49152,
+    "world": "S_EMP_P"
+  },
+  {
+    "package": "S_EMP_StationC_Loot",
+    "path": "S_EMP_StationC_Loot.TheWorld.PersistentLevel.XVendingMachine_1",
+    "archetype": "SP_Vending_Emporia_Entry",
+    "kind": "Minuteman's Armory",
+    "location": [
+      -5695.0,
+      44042.0,
+      -10592.0
+    ],
+    "yaw": 16384,
+    "world": "S_EMP_P"
+  },
+  {
+    "package": "S_EMP_Statue_GeoA",
+    "path": "S_EMP_Statue_GeoA.TheWorld.PersistentLevel.XVendingMachine_2",
+    "archetype": "SP_VigorVending_Emporia_Final",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      15004.8,
+      25107.5,
+      -8537.7
+    ],
+    "yaw": 0,
+    "world": "S_EMP2_P"
+  },
+  {
+    "package": "S_EMP_Statue_GeoA",
+    "path": "S_EMP_Statue_GeoA.TheWorld.PersistentLevel.XVendingMachine_3",
+    "archetype": "SP_Vending_Emporia_Final",
+    "kind": "Minuteman's Armory",
+    "location": [
+      16209.4,
+      25097.2,
+      -8545.7
+    ],
+    "yaw": 32768,
+    "world": "S_EMP2_P"
+  },
+  {
+    "package": "S_EMP_Statue_GeoA",
+    "path": "S_EMP_Statue_GeoA.TheWorld.PersistentLevel.XVendingMachine_4",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      15587.0,
+      25860.0,
+      -8550.0
+    ],
+    "yaw": -15872,
+    "world": "S_EMP2_P"
+  },
+  {
+    "package": "S_EMP_Statue_Loot",
+    "path": "S_EMP_Statue_Loot.TheWorld.PersistentLevel.XVendingMachine_2",
+    "archetype": "SP_VigorVending_Emporia_Final",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      6752.3,
+      11618.3,
+      -10624.0
+    ],
+    "yaw": -38400,
+    "world": "S_EMP2_P"
+  },
+  {
+    "package": "S_EMP_Statue_Loot",
+    "path": "S_EMP_Statue_Loot.TheWorld.PersistentLevel.XVendingMachine_3",
+    "archetype": "SP_Vending_Emporia_Final",
+    "kind": "Minuteman's Armory",
+    "location": [
+      6472.8,
+      11234.2,
+      -10616.0
+    ],
+    "yaw": -39936,
+    "world": "S_EMP2_P"
+  },
+  {
+    "package": "S_EMP_Statue_Street_Geo",
+    "path": "S_EMP_Statue_Street_Geo.TheWorld.PersistentLevel.XVendingMachine_5",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      4161.2,
+      13738.8,
+      -10647.0
+    ],
+    "yaw": -7168,
+    "world": "S_EMP2_P"
+  },
+  {
+    "package": "S_EMP_Street_Loot",
+    "path": "S_EMP_Street_Loot.TheWorld.PersistentLevel.XVendingMachine_4",
+    "archetype": "SP_Vending_Emporia_Final",
+    "kind": "Minuteman's Armory",
+    "location": [
+      2552.0,
+      23852.0,
+      -12912.0
+    ],
+    "yaw": -32768,
+    "world": "S_EMP2_P"
+  },
+  {
+    "package": "S_EMP_Street_Loot",
+    "path": "S_EMP_Street_Loot.TheWorld.PersistentLevel.XVendingMachine_5",
+    "archetype": "SP_VigorVending_Emporia_Final",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      2527.9,
+      23020.7,
+      -12912.0
+    ],
+    "yaw": 32768,
+    "world": "S_EMP2_P"
+  },
+  {
+    "package": "S_EMP_Street_Loot",
+    "path": "S_EMP_Street_Loot.TheWorld.PersistentLevel.XVendingMachine_6",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      2572.0,
+      22033.0,
+      -12912.0
+    ],
+    "yaw": -32768,
+    "world": "S_EMP2_P"
+  },
+  {
+    "package": "S_Fink_Bar_Airlock",
+    "path": "S_Fink_Bar_Airlock.TheWorld.PersistentLevel.XVendingMachine_1",
+    "archetype": "SP_Vending_Finkton_Entry",
+    "kind": "Minuteman's Armory",
+    "location": [
+      23142.0,
+      -49204.0,
+      -1180.0
+    ],
+    "yaw": 0,
+    "world": "S_Fink2_P"
+  },
+  {
+    "package": "S_Fink_Bar_Geo",
+    "path": "S_Fink_Bar_Geo.TheWorld.PersistentLevel.XVendingMachine_2",
+    "archetype": "SP_VigorVending_Finkton_Entry",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      23427.0,
+      -49962.0,
+      -2464.0
+    ],
+    "yaw": 0,
+    "world": "S_Fink2_P"
+  },
+  {
+    "package": "S_Fink_Bar_Geo",
+    "path": "S_Fink_Bar_Geo.TheWorld.PersistentLevel.XVendingMachine_3",
+    "archetype": "SP_ConsumableVendingMachineLockPick",
+    "kind": "Dollar Bill",
+    "location": [
+      26267.0,
+      -45860.0,
+      -2464.0
+    ],
+    "yaw": -16384,
+    "world": "S_Fink2_P"
+  },
+  {
+    "package": "S_Fink_Docks_D_Int_Geo",
+    "path": "S_Fink_Docks_D_Int_Geo.TheWorld.PersistentLevel.XVendingMachine_0",
+    "archetype": "SP_VigorVending_Finkton_Entry",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      -32084.0,
+      -57520.0,
+      8928.0
+    ],
+    "yaw": -16384,
+    "world": "S_Fink_P"
+  },
+  {
+    "package": "S_Fink_Docks_D_Int_Geo",
+    "path": "S_Fink_Docks_D_Int_Geo.TheWorld.PersistentLevel.XVendingMachine_1",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      -31640.0,
+      -57520.0,
+      8928.0
+    ],
+    "yaw": -16384,
+    "world": "S_Fink_P"
+  },
+  {
+    "package": "S_Fink_Docks_Geo_Lock",
+    "path": "S_Fink_Docks_Geo_Lock.TheWorld.PersistentLevel.XVendingMachine_0",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      14476.0,
+      -56520.0,
+      -1088.0
+    ],
+    "yaw": -16384,
+    "world": "S_Fink2_P"
+  },
+  {
+    "package": "S_Fink_Docks_Hut_Geo",
+    "path": "S_Fink_Docks_Hut_Geo.TheWorld.PersistentLevel.XVendingMachine_0",
+    "archetype": "SP_VigorVending_Finkton_Entry",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      -38937.2,
+      -5199.4,
+      6944.0
+    ],
+    "yaw": 40960,
+    "world": "S_Fink_P"
+  },
+  {
+    "package": "S_Fink_factory_geo",
+    "path": "S_Fink_factory_geo.TheWorld.PersistentLevel.XVendingMachine_20",
+    "archetype": "SP_Vending_Factory_Entry",
+    "kind": "Minuteman's Armory",
+    "location": [
+      10240.0,
+      -109444.0,
+      16092.0
+    ],
+    "yaw": 16384,
+    "world": "S_Fink4_P"
+  },
+  {
+    "package": "S_Fink_factory_geo",
+    "path": "S_Fink_factory_geo.TheWorld.PersistentLevel.XVendingMachine_21",
+    "archetype": "SP_Vending_Factory_Entry",
+    "kind": "Minuteman's Armory",
+    "location": [
+      9504.9,
+      -102467.3,
+      16092.0
+    ],
+    "yaw": 27136,
+    "world": "S_Fink4_P"
+  },
+  {
+    "package": "S_Fink_factory_geo",
+    "path": "S_Fink_factory_geo.TheWorld.PersistentLevel.XVendingMachine_22",
+    "archetype": "SP_Vending_Factory_Entry",
+    "kind": "Minuteman's Armory",
+    "location": [
+      10240.0,
+      -105148.0,
+      16092.0
+    ],
+    "yaw": 16384,
+    "world": "S_Fink4_P"
+  },
+  {
+    "package": "S_Fink_factory_geo",
+    "path": "S_Fink_factory_geo.TheWorld.PersistentLevel.XVendingMachine_23",
+    "archetype": "SP_Vending_Factory_Entry",
+    "kind": "Minuteman's Armory",
+    "location": [
+      10240.0,
+      -106688.0,
+      16092.0
+    ],
+    "yaw": 16384,
+    "world": "S_Fink4_P"
+  },
+  {
+    "package": "S_Fink_factory_geo",
+    "path": "S_Fink_factory_geo.TheWorld.PersistentLevel.XVendingMachine_24",
+    "archetype": "SP_Vending_Factory_Entry",
+    "kind": "Minuteman's Armory",
+    "location": [
+      10240.0,
+      -108224.0,
+      16092.0
+    ],
+    "yaw": 16384,
+    "world": "S_Fink4_P"
+  },
+  {
+    "package": "S_Fink_factory_geo",
+    "path": "S_Fink_factory_geo.TheWorld.PersistentLevel.XVendingMachine_25",
+    "archetype": "SP_Vending_Factory_Entry",
+    "kind": "Minuteman's Armory",
+    "location": [
+      10240.0,
+      -103632.0,
+      16092.0
+    ],
+    "yaw": 16384,
+    "world": "S_Fink4_P"
+  },
+  {
+    "package": "S_Fink_factory_geo",
+    "path": "S_Fink_factory_geo.TheWorld.PersistentLevel.XVendingMachine_26",
+    "archetype": "SP_Vending_Factory_Entry",
+    "kind": "Minuteman's Armory",
+    "location": [
+      9935.2,
+      -102864.8,
+      16092.0
+    ],
+    "yaw": 25088,
+    "world": "S_Fink4_P"
+  },
+  {
+    "package": "S_Fink_Factory_office",
+    "path": "S_Fink_Factory_office.TheWorld.PersistentLevel.XVendingMachine_2",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      10584.0,
+      -115656.0,
+      28456.0
+    ],
+    "yaw": -49152,
+    "world": "S_Fink4_P"
+  },
+  {
+    "package": "S_Fink_Factory_top",
+    "path": "S_Fink_Factory_top.TheWorld.PersistentLevel.XVendingMachine_0",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      6384.0,
+      -104544.0,
+      28922.0
+    ],
+    "yaw": 2048,
+    "world": "S_Fink4_P"
+  },
+  {
+    "package": "S_Fink_Factory_top",
+    "path": "S_Fink_Factory_top.TheWorld.PersistentLevel.XVendingMachine_4",
+    "archetype": "SP_VigorVending_Finkton_Final",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      6369.2,
+      -105104.5,
+      28923.0
+    ],
+    "yaw": 0,
+    "world": "S_Fink4_P"
+  },
+  {
+    "package": "S_Fink_Factory_top",
+    "path": "S_Fink_Factory_top.TheWorld.PersistentLevel.XVendingMachine_6",
+    "archetype": "SP_Vending_Factory_Entry",
+    "kind": "Minuteman's Armory",
+    "location": [
+      6496.0,
+      -106384.0,
+      28922.0
+    ],
+    "yaw": 0,
+    "world": "S_Fink4_P"
+  },
+  {
+    "package": "S_Fink_Hub_Game",
+    "path": "S_Fink_Hub_Game.TheWorld.PersistentLevel.XVendingMachine_2",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      21388.0,
+      -42620.0,
+      -1610.0
+    ],
+    "yaw": 32768,
+    "world": "S_Fink2_P"
+  },
+  {
+    "package": "S_Fink_Hub_geo",
+    "path": "S_Fink_Hub_geo.TheWorld.PersistentLevel.XVendingMachine_1",
+    "archetype": "SP_Vending_Finkton_Entry",
+    "kind": "Minuteman's Armory",
+    "location": [
+      8107.5,
+      -56547.2,
+      -1063.2
+    ],
+    "yaw": 15320,
+    "world": "S_Fink2_P"
+  },
+  {
+    "package": "S_Fink_Hub_geo",
+    "path": "S_Fink_Hub_geo.TheWorld.PersistentLevel.XVendingMachine_2",
+    "archetype": "SP_VigorVending_Finkton_Entry",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      18428.5,
+      -53087.3,
+      -1004.0
+    ],
+    "yaw": -16384,
+    "world": "S_Fink2_P"
+  },
+  {
+    "package": "S_Fink_Hub_Geo_fl",
+    "path": "S_Fink_Hub_Geo_fl.TheWorld.PersistentLevel.XVendingMachine_1",
+    "archetype": "SP_Vending_Finkton_Entry",
+    "kind": "Minuteman's Armory",
+    "location": [
+      10481.7,
+      -33017.1,
+      -586.1
+    ],
+    "yaw": -16384,
+    "world": "S_Fink2_P"
+  },
+  {
+    "package": "S_Fink_Hub_Lock01",
+    "path": "S_Fink_Hub_Lock01.TheWorld.PersistentLevel.XVendingMachine_2",
+    "archetype": "SP_VigorVending_Finkton_Entry",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      13891.0,
+      -41687.0,
+      -1079.0
+    ],
+    "yaw": 0,
+    "world": "S_Fink2_P"
+  },
+  {
+    "package": "S_Fink_Hub_Lock01",
+    "path": "S_Fink_Hub_Lock01.TheWorld.PersistentLevel.XVendingMachine_3",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      13892.0,
+      -41982.0,
+      -1082.0
+    ],
+    "yaw": 0,
+    "world": "S_Fink2_P"
+  },
+  {
+    "package": "S_Fink_Shanty_Bar_Ext_Game",
+    "path": "S_Fink_Shanty_Bar_Ext_Game.TheWorld.PersistentLevel.XVendingMachine_0",
+    "archetype": "SP_Vending_Finkton_ShantytownBroken",
+    "kind": "Minuteman's Armory",
+    "location": [
+      26728.8,
+      -17962.4,
+      -10176.0
+    ],
+    "yaw": 21376,
+    "world": "?"
+  },
+  {
+    "package": "S_Fink_Shanty_Bar_Int_Geo",
+    "path": "S_Fink_Shanty_Bar_Int_Geo.TheWorld.PersistentLevel.XVendingMachine_1",
+    "archetype": "SP_Vending_Finkton_Entry",
+    "kind": "Minuteman's Armory",
+    "location": [
+      32022.0,
+      -10652.0,
+      -10268.0
+    ],
+    "yaw": 0,
+    "world": "S_Fink3_P"
+  },
+  {
+    "package": "S_Fink_Shanty_Bar_Int_Geo",
+    "path": "S_Fink_Shanty_Bar_Int_Geo.TheWorld.PersistentLevel.XVendingMachine_3",
+    "archetype": "SP_VigorVending_Finkton_Entry",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      34798.0,
+      -9898.0,
+      -10224.0
+    ],
+    "yaw": -32768,
+    "world": "S_Fink3_P"
+  },
+  {
+    "package": "S_Fink_Shanty_Bar_Int_Geo",
+    "path": "S_Fink_Shanty_Bar_Int_Geo.TheWorld.PersistentLevel.XVendingMachine_4",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      34786.0,
+      -9628.0,
+      -10224.0
+    ],
+    "yaw": 32768,
+    "world": "S_Fink3_P"
+  },
+  {
+    "package": "S_Fink_Terr_C1",
+    "path": "S_Fink_Terr_C1.TheWorld.PersistentLevel.XVendingMachine_0",
+    "archetype": "SP_Vending_Finkton_Entry",
+    "kind": "Minuteman's Armory",
+    "location": [
+      -1219.0,
+      -46490.0,
+      15845.0
+    ],
+    "yaw": -16384,
+    "world": "S_Fink2_P"
+  },
+  {
+    "package": "S_Fink_Terr_C1",
+    "path": "S_Fink_Terr_C1.TheWorld.PersistentLevel.XVendingMachine_1",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      -1200.0,
+      -50984.0,
+      15846.0
+    ],
+    "yaw": 16384,
+    "world": "S_Fink2_P"
+  },
+  {
+    "package": "S_Fink_Terr_C1",
+    "path": "S_Fink_Terr_C1.TheWorld.PersistentLevel.XVendingMachine_2",
+    "archetype": "SP_VigorVending_Finkton_Entry",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      -1020.0,
+      -51820.0,
+      17928.0
+    ],
+    "yaw": 16384,
+    "world": "S_Fink2_P"
+  },
+  {
+    "package": "S_Fink_Terr_Geo",
+    "path": "S_Fink_Terr_Geo.TheWorld.PersistentLevel.XVendingMachine_0",
+    "archetype": "SP_ConsumableVendingMachineLockPick",
+    "kind": "Dollar Bill",
+    "location": [
+      -4443.0,
+      -58374.0,
+      10728.0
+    ],
+    "yaw": 32768,
+    "world": "S_Fink_P"
+  },
+  {
+    "package": "S_Fink_Terr_Geo",
+    "path": "S_Fink_Terr_Geo.TheWorld.PersistentLevel.XVendingMachine_1",
+    "archetype": "SP_Vending_Finkton_Entry",
+    "kind": "Minuteman's Armory",
+    "location": [
+      -4437.0,
+      -61494.0,
+      10728.0
+    ],
+    "yaw": 32768,
+    "world": "S_Fink_P"
+  },
+  {
+    "package": "S_twn_FairStreet_C1b_Geo",
+    "path": "S_twn_FairStreet_C1b_Geo.TheWorld.PersistentLevel.XVendingMachine_1",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      -39805.5,
+      -115629.3,
+      -2541.0
+    ],
+    "yaw": -8192,
+    "world": "S_TWN_P"
+  },
+  {
+    "package": "S_TWN_FairStreet_Geo",
+    "path": "S_TWN_FairStreet_Geo.TheWorld.PersistentLevel.XVendingMachine_0",
+    "archetype": "SP_VigorVending_TownCenter_Entry",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      -31656.0,
+      -121066.0,
+      -2120.0
+    ],
+    "yaw": 16384,
+    "world": "S_TWN_P"
+  },
+  {
+    "package": "S_TWN_Lodge_UpperFloor",
+    "path": "S_TWN_Lodge_UpperFloor.TheWorld.PersistentLevel.XVendingMachine_0",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      -53730.0,
+      -89243.0,
+      -2448.0
+    ],
+    "yaw": 16384,
+    "world": "S_TWN2_P"
+  },
+  {
+    "package": "S_TWN_Park_Geo",
+    "path": "S_TWN_Park_Geo.TheWorld.PersistentLevel.XVendingMachine_0",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      -38524.0,
+      -103679.0,
+      -2286.0
+    ],
+    "yaw": 114688,
+    "world": "S_TWN_P"
+  },
+  {
+    "package": "S_TWN_Park_Geo",
+    "path": "S_TWN_Park_Geo.TheWorld.PersistentLevel.XVendingMachine_1",
+    "archetype": "SP_VigorVending_TownCenter_Entry",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      -42612.0,
+      -96848.0,
+      -2288.0
+    ],
+    "yaw": 8192,
+    "world": "S_TWN_P"
+  },
+  {
+    "package": "S_TWN_Port_GeoA",
+    "path": "S_TWN_Port_GeoA.TheWorld.PersistentLevel.XVendingMachine_0",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      -43444.0,
+      18060.0,
+      9541.0
+    ],
+    "yaw": 49152,
+    "world": "S_TWN3_P"
+  },
+  {
+    "package": "S_TWN_Port_GeoA",
+    "path": "S_TWN_Port_GeoA.TheWorld.PersistentLevel.XVendingMachine_1",
+    "archetype": "SP_VigorVending_TownCenter_Final",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      -45451.0,
+      18047.0,
+      9541.0
+    ],
+    "yaw": -15872,
+    "world": "S_TWN3_P"
+  },
+  {
+    "package": "S_TWN_StationEnt_Geo",
+    "path": "S_TWN_StationEnt_Geo.TheWorld.PersistentLevel.XVendingMachine_1",
+    "archetype": "SP_VigorVending_TownCenter_Final",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      -41930.0,
+      -53096.0,
+      -3208.0
+    ],
+    "yaw": -32256,
+    "world": "S_TWN3_P"
+  },
+  {
+    "package": "S_TWN_StationEnt_Geo",
+    "path": "S_TWN_StationEnt_Geo.TheWorld.PersistentLevel.XVendingMachine_2",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      -41916.0,
+      -52429.0,
+      -3208.0
+    ],
+    "yaw": -32256,
+    "world": "S_TWN3_P"
+  },
+  {
+    "package": "S_TWN_StationExit_Geo",
+    "path": "S_TWN_StationExit_Geo.TheWorld.PersistentLevel.XVendingMachine_1",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      -44924.0,
+      -41195.0,
+      -2984.0
+    ],
+    "yaw": 0,
+    "world": "S_TWN3_P"
+  },
+  {
+    "package": "S_TWN_StationExit_Geo",
+    "path": "S_TWN_StationExit_Geo.TheWorld.PersistentLevel.XVendingMachine_2",
+    "archetype": "SP_VigorVending_TownCenter_Final",
+    "kind": "Veni! Vidi! Vigor!",
+    "location": [
+      -44921.0,
+      -41511.0,
+      -2984.0
+    ],
+    "yaw": 0,
+    "world": "S_TWN3_P"
+  },
+  {
+    "package": "S_TWN_StreetF_Geo",
+    "path": "S_TWN_StreetF_Geo.TheWorld.PersistentLevel.XVendingMachine_1",
+    "archetype": "SP_ConsumableVendingMachine",
+    "kind": "Dollar Bill",
+    "location": [
+      -20650.0,
+      -82442.0,
+      -6935.0
+    ],
+    "yaw": 16384,
+    "world": "S_TWN2_P"
+  }
+]
