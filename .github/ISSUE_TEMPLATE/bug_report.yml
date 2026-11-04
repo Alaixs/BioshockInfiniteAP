@@ -1,0 +1,39 @@
+name: Bug report
+description: Something doesn't work in game, in generation or with the client.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected and what happened instead.
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Where in the game?
+      description: Area and chapter, or "generation" / "connection".
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: >-
+        The mod's version (first line of BioShockAP.log, or the DLL's Properties > Details), the
+        apworld's and Archipelago's.
+      placeholder: "mod 0.1.0, apworld 0.1.0, Archipelago 0.6.7"
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: BioShockAP.log
+      description: >-
+        Attach BioShockAP.log from the game's Binaries\Win32 folder (drag and drop the file here).
+        It contains your slot name and the server address, but never your password.
+  - type: textarea
+    id: yaml
+    attributes:
+      label: Your YAML
+      description: For generation problems, your player YAML (or the options you changed).
+      render: yaml
