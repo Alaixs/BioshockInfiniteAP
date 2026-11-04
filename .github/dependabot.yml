@@ -1,0 +1,16 @@
+# Keeps the GitHub Actions of the workflows and the pinned Python tools up to date.
+# The pre-commit hooks are updated with `pre-commit autoupdate` (see .pre-commit-config.yaml).
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: monthly
+    ignore:
+      # Pinned on purpose: another version would rewrite the generated images (requirements-dev.txt).
+      - dependency-name: pillow

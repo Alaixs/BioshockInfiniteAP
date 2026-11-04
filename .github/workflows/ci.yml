@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - name: Install the pinned tools
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Run every check of .pre-commit-config.yaml
+        run: pre-commit run --all-files --show-diff-on-failure
+
+  apworld:
+    name: Apworld tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - uses: ./.github/actions/archipelago
+        with:
+          install-apworld: "false"
+
+      - name: Install pytest
+        run: python -m pip install -r Archipelago/ci-requirements.txt
+
+      - name: Run the world's tests, then Archipelago's tests of every world
+        run: python apworld/run_tests.py Archipelago --general -n auto
+
+  build:
+    name: Build
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Build the mod and the loop test
+        run: |
+          cmake -S mod -B mod/build -A Win32
+          cmake --build mod/build --config Release --target BioShockAP loop_test
+
+      - name: Package the apworld
+        run: python apworld/build.py
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: build
+          if-no-files-found: error
+          path: |
+            mod/bin/Release/xinput1_3.dll
+            mod/bin/tests/Release/loop_test.exe
+            apworld/build/bioshock_infinite.apworld
+
+  test:
+    name: Loop test
+    needs: build
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: build
+
+      - uses: ./.github/actions/archipelago
+
+      - name: Generate a seed, start a server and run the client against it
+        run: python mod/tests/run_loop_test.py Archipelago

@@ -1,0 +1,64 @@
+name: Release
+
+# Push a tag matching the apworld's world_version to publish a release, for example:
+#   git tag v0.1.0 && git push origin v0.1.0
+# 0.x versions are published as pre-releases (beta).
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  release:
+    name: Publish
+    needs: ci
+    runs-on: windows-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Check that the tag matches the apworld version
+        shell: pwsh
+        run: |
+          $version = (Get-Content apworld/bioshock_infinite/archipelago.json | ConvertFrom-Json).world_version
+          if ("v$version" -ne "${{ github.ref_name }}") {
+            throw "Tag ${{ github.ref_name }} does not match world_version $version in archipelago.json"
+          }
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: build
+
+      - uses: ./.github/actions/archipelago
+
+      - name: Generate the template YAML
+        working-directory: Archipelago
+        run: python -c "import Options; Options.generate_yaml_templates('templates', False)"
+
+      - name: Package
+        shell: pwsh
+        run: |
+          New-Item dist -ItemType Directory | Out-Null
+          Copy-Item mod/bin/Release/xinput1_3.dll dist/
+          Copy-Item apworld/build/bioshock_infinite.apworld dist/
+          Copy-Item "Archipelago/templates/BioShock Infinite.yaml" dist/BioShockInfinite.yaml
+          Compress-Archive -Path mod/bin/Release/xinput1_3.dll, README.md, LICENSE, THIRD_PARTY.md `
+            -DestinationPath "dist/BioShockInfiniteAP-${{ github.ref_name }}.zip"
+
+      - uses: softprops/action-gh-release@v3
+        with:
+          files: dist/*
+          generate_release_notes: true
+          prerelease: ${{ startsWith(github.ref_name, 'v0.') }}
