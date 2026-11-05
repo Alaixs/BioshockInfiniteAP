@@ -31,7 +31,8 @@ import websockets
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
-ARCHIPELAGO = sys.argv[1] if len(sys.argv) > 1 else r"C:\ProgramData\Archipelago"
+# Absolute: the Archipelago tools run with it as working directory (the CI passes a relative path).
+ARCHIPELAGO = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else r"C:\ProgramData\Archipelago")
 PORT = 38282
 TEST_EXE = os.path.join(ROOT, "mod", "bin", "tests", "Release", "loop_test.exe")
 MACHINES = os.path.join(ROOT, "apworld", "bioshock_infinite", "machines.py")
@@ -110,14 +111,19 @@ def main() -> int:
 
 def run(work: str) -> int:
     """Generates the seed in work, starts the server and the fake player, runs the test."""
-    subprocess.run(
+    generate = subprocess.run(
         archipelago_command("Generate")
         + [f"--player_files_path={os.path.join(HERE, 'players')}", f"--outputpath={work}"],
         cwd=ARCHIPELAGO,
-        check=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        errors="replace",
     )
+    if generate.returncode != 0:
+        print(generate.stdout)
+        print(f"The seed generation failed (exit code {generate.returncode}).")
+        return 2
     multidata = glob.glob(os.path.join(work, "AP_*.zip"))[0]
     server_log_path = os.path.join(work, "server.txt")
     with open(server_log_path, "w", encoding="utf-8", errors="replace") as server_log:
