@@ -1,0 +1,36 @@
+name: Archipelago
+description: Checks out Archipelago from source, installs its requirements and, by default, this repo's apworld.
+
+inputs:
+  version:
+    description: Archipelago tag (the apworld's minimum_ap_version)
+    default: "0.6.7"
+  path:
+    description: Where to put Archipelago
+    default: Archipelago
+  install-apworld:
+    description: Install the packaged apworld into custom_worlds ("false" for the unit tests, which use the source)
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    - name: Check out Archipelago
+      shell: bash
+      run: git clone --quiet --depth 1 --branch "${{ inputs.version }}" https://github.com/ArchipelagoMW/Archipelago.git "${{ inputs.path }}"
+
+    - name: Install its requirements
+      shell: bash
+      working-directory: ${{ inputs.path }}
+      run: |
+        python ModuleUpdate.py --yes
+        python -m pip install --quiet -r requirements.txt
+        # Already installed: Archipelago's scripts must not check them again (it would prompt).
+        echo "SKIP_REQUIREMENTS_UPDATE=1" >> "$GITHUB_ENV"
+        # host.yaml, read by some of Archipelago's own tests.
+        python Launcher.py --update_settings
+
+    - name: Install the apworld
+      if: inputs.install-apworld == 'true'
+      shell: bash
+      run: python apworld/build.py --install "${{ inputs.path }}/custom_worlds"
