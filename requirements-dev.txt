@@ -1,0 +1,11 @@
+# Development tools, pinned so every machine and the CI get the same results (Python 3.11+):
+#   python -m pip install -r requirements-dev.txt
+#   pre-commit install
+# pre-commit then runs the formatters and checks of .pre-commit-config.yaml on every commit.
+pre-commit==4.7.0
+# The loop test's fake DeathLink player (mod/tests/run_loop_test.py).
+websockets==17.4
+# tools/: reading the game's packages (LZO compressed) and making the images. Pillow stays on 11.3:
+# another version resamples slightly differently and would rewrite the generated headers.
+lzallright==0.3.0
+pillow==11.3.0
