@@ -2,6 +2,8 @@ name: Booker
 game: BioShock Infinite
 BioShock Infinite:
   items_per_machine: 2
+  # ChecksFinder only has progression items: without this, no row would sell one of Finder's.
+  progression_in_shops: true
   minimum_price: 10
   maximum_price: 50
   lock_vending_items: true

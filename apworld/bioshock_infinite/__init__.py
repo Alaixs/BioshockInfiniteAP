@@ -24,6 +24,7 @@ from .data import (
     LOCKPICKING,
     LOCKPICKING_FIRST_AREA,
     PASSES,
+    SHOP_AREAS,
     SILVER_EAGLES,
     TEARS,
     TEARS_FIRST_AREA,
@@ -46,7 +47,7 @@ from .data import (
     upgrade_shop_location_name,
     vigor_item_name,
 )
-from .options import BioShockInfiniteOptions, CheckpointChecks, Goal, option_groups
+from .options import BioShockInfiniteOptions, CheckpointChecks, Goal, PriceScaling, option_groups
 
 
 class BioShockInfiniteItem(Item):
@@ -154,9 +155,13 @@ class BioShockInfiniteWorld(World):
 
         def shop_location(name: str, area: str) -> None:
             # The row's name shows before buying, so none of our own traps (other players' are
-            # fine). Our Silver Eagles are moved out in finalize_multiworld.
+            # fine). Our Silver Eagles are moved out in finalize_multiworld. Without
+            # progression_in_shops, no progression item: money must never block anyone.
             location = BioShockInfiniteLocation(self.player, name, location_name_to_id[name], region(area))
-            location.item_rule = lambda item: not (item.player == self.player and item.name in TRAPS)
+            progression = bool(self.options.progression_in_shops)
+            location.item_rule = lambda item: (
+                not (item.player == self.player and item.name in TRAPS) and (progression or not item.advancement)
+            )
             region(area).locations.append(location)
             self.shop_locations.append(location)
 
@@ -211,9 +216,15 @@ class BioShockInfiniteWorld(World):
         pieces = self.random.sample([gear_item_name(name) for name, _, _ in GEAR_ITEMS], len(self.gear))
         pool += [self.create_item(name) for name in pieces]
         pool += [self.create_item(upgrade_item_name(name)) for name, _, _ in self.upgrades]
+        shops = set(self.shop_locations)
         for name, first_area in self.gates:
             early = AREAS[: AREAS.index(first_area)]
-            if any(self.area_regions[area].locations for area in early if area in self.area_regions):
+            if any(
+                self.options.progression_in_shops or location not in shops
+                for area in early
+                if area in self.area_regions
+                for location in self.area_regions[area].locations
+            ):
                 pool.append(self.create_item(name))
             else:  # no location of ours before its area: given from the start
                 self.multiworld.push_precollected(self.create_item(name))
@@ -293,8 +304,17 @@ class BioShockInfiniteWorld(World):
                 others.remove(other)
                 return
 
-    def fill_slot_data(self) -> dict:
+    def shop_price(self, area: str) -> int:
         low, high = self.options.minimum_price.value, self.options.maximum_price.value
+        if self.options.price_scaling == PriceScaling.option_flat:
+            return self.random.randint(low, high)
+        # A window of 40% of the range that moves up with the story (all shop areas, chosen or not:
+        # the money found depends on how far the player is).
+        position = SHOP_AREAS.index(area) / max(1, len(SHOP_AREAS) - 1)
+        start = low + round((high - low) * 0.6 * position)
+        return self.random.randint(start, start + round((high - low) * 0.4))
+
+    def fill_slot_data(self) -> dict:
         machines: dict[str, list[int]] = {}
         prices: dict[str, int] = {}
         for area, number, path in self.machines:
@@ -304,7 +324,7 @@ class BioShockInfiniteWorld(World):
             ]
             machines[path] = ids
             for loc in ids:
-                prices[str(loc)] = self.random.randint(low, high)
+                prices[str(loc)] = self.shop_price(area)
         for area, number, kind, paths in self.upgrade_shops:
             ids = [
                 location_name_to_id[upgrade_shop_location_name(area, kind, number, item)]
@@ -313,7 +333,7 @@ class BioShockInfiniteWorld(World):
             for path in paths:
                 machines[path] = ids
             for loc in ids:
-                prices[str(loc)] = self.random.randint(low, high)
+                prices[str(loc)] = self.shop_price(area)
         # The DLL's client doesn't know the world's tables: everything it needs goes here.
         return {
             "goal": "siphon" if self.options.goal == Goal.option_siphon else "shop",

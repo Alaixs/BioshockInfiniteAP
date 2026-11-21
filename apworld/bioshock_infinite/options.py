@@ -147,6 +147,27 @@ class MaximumPrice(Range):
     default = 50
 
 
+class PriceScaling(Choice):
+    """How prices spread between Minimum Price and Maximum Price.
+    By Area: the further the area in the story, the higher its prices, since you find more money
+    later on. The first shop area draws from the lowest 40% of the range, the last one from the
+    highest 40%.
+    Flat: any price of the range, in every area."""
+
+    display_name = "Price Scaling"
+    option_flat = 0
+    option_by_area = 1
+    default = 1
+
+
+class ProgressionInShops(Toggle):
+    """Shop items may be progression items, yours or other players'. Off: shops only sell useful
+    items, filler and traps, so an item you can't afford, or a shop left behind, never blocks
+    anyone."""
+
+    display_name = "Progression in Shops"
+
+
 class LockVendingItems(DefaultOnToggle):
     """Health kits, salts and every ammo type can't be bought from Dollar Bill machines
     until you receive the matching unlock item."""
@@ -191,6 +212,8 @@ class BioShockInfiniteOptions(PerGameCommonOptions):
     randomize_vigors: RandomizeVigors
     minimum_price: MinimumPrice
     maximum_price: MaximumPrice
+    price_scaling: PriceScaling
+    progression_in_shops: ProgressionInShops
     lock_vending_items: LockVendingItems
     lock_tears: LockTears
     lock_lockpicking: LockLockpicking
@@ -207,6 +230,7 @@ option_groups = [
             ShopAreas,
             ItemsPerMachine,
             ItemsPerUpgradeMachine,
+            ProgressionInShops,
             VoxophoneAreas,
             InfusionAreas,
             GearAreas,
@@ -215,6 +239,6 @@ option_groups = [
         ],
     ),
     OptionGroup("Locks", [LockVendingItems, LockTears, LockLockpicking, AreaPasses]),
-    OptionGroup("Shop Prices", [MinimumPrice, MaximumPrice]),
+    OptionGroup("Shop Prices", [MinimumPrice, MaximumPrice, PriceScaling]),
     OptionGroup("Traps", [TrapPercentage, BoysOfSilenceTrap]),
 ]
