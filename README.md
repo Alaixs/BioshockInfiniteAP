@@ -3,7 +3,7 @@
 An [Archipelago](https://archipelago.gg) multiworld randomizer for BioShock Infinite. It has two
 parts: a game mod with the Archipelago client built in, and the apworld that generates games.
 
-This is a beta (0.1): expect rough edges. When something goes wrong, please
+This is a beta: expect rough edges. When something goes wrong, please
 [open an issue](../../issues/new/choose) with your `BioShockAP.log`.
 
 ## What changes in the game
@@ -19,7 +19,7 @@ This is a beta (0.1): expect rough edges. When something goes wrong, please
 - You log in from the game's main menu, short messages at the bottom of the screen tell you what
   was sent and received, and DeathLink is supported.
 
-Every option is described on the [game page](apworld/bioshock_infinite/docs/en_BioShock%20Infinite.md).
+Every option is described on the [game page](<apworld/bioshock_infinite/docs/en_BioShock%20Infinite.md>).
 
 ## Requirements
 
