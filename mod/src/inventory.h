@@ -7,7 +7,7 @@
 //                  "giveonce done <arg>", or "giveonce wait <arg>" while the item isn't in memory.
 //                  For items given outside the queue (upgrades only exist in some levels).
 //   infusionpick <token>  Infusion to choose (token: its save variable). Opens the game's choice
-//                  screen or, when it can't, a message offering F9 health, F10 shield, F11 salts.
+//                  screen (again every 3 s while it can't: another screen open, pause menu...).
 //                  "err choice pending" until the player chooses, then "infusionpick done|wait
 //                  <token>" until the item is in memory and given.
 //
@@ -34,5 +34,8 @@ bool Command(const std::string& cmd, const std::string& arg, const void* control
 
 // Every frame: Infusion choice screen and choice keys.
 void Tick(const void* controller);
+
+// An Infusion waits for the player's choice (its screen is open, or comes back soon).
+bool ChoicePending();
 
 }  // namespace bsap::inventory

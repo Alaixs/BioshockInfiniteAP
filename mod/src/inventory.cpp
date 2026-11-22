@@ -11,6 +11,7 @@
 #include "MinHook.h"
 #include "ue3.h"
 
+#include <intrin.h>
 #include <windows.h>
 
 #include <cstdint>
@@ -89,7 +90,6 @@ bool AcceptChoice(const void* controller, int index) {
         return false;
     }
     g_pickChoice = index;
-    apnotify::SetInfusionPrompt(false);
     return true;
 }
 
@@ -254,10 +254,43 @@ void EnsureAcceptHook() {
     }
 }
 
-bool GameHasFocus() {
-    DWORD pid = 0;
-    GetWindowThreadProcessId(GetForegroundWindow(), &pid);
-    return pid == GetCurrentProcessId();
+// Stand-in for an owned item whose object is not loaded in this zone: no weapon list to upgrade,
+// and applying it as gear does nothing. The item stays in the inventory and works again where it is
+// loaded.
+void __fastcall SkipGear(void*, void*, int, int, int) {}
+const void* g_skipVtable[build::kGearApplySlot + 1] = {};
+struct MissingItem {
+    const void* const* vtable;
+    std::uint8_t fields[build::kUpgradeWeaponList + 0x100];
+};
+MissingItem g_missingItem = {};
+
+using EntryResolve_t = const void*(__fastcall*)(const void* entry, void* edx);
+EntryResolve_t g_originalEntryResolve = nullptr;
+
+const void* __fastcall EntryResolveDetour(const void* entry, void* edx) {
+    const void* item = g_originalEntryResolve(entry, edx);
+    if (item) return item;
+    const auto from = reinterpret_cast<std::uintptr_t>(_ReturnAddress()) - Base();
+    if (from != build::kRvaApplyUpgradeCallSite && from != build::kRvaApplyGearCallSite) return item;
+    std::uint32_t id = 0;
+    ue3::ReadBytes(entry, &id, sizeof(id));
+    Log("inventory: item %u not loaded in this zone, skipped for the new pawn", id);
+    return &g_missingItem;
+}
+
+void EnsureMissingItemGuard() {
+    static bool done = false;
+    if (done) return;
+    done = true;
+    for (const void*& slot : g_skipVtable) slot = reinterpret_cast<const void*>(&SkipGear);
+    g_missingItem.vtable = g_skipVtable;
+    void* target = reinterpret_cast<void*>(Base() + build::kRvaInventoryEntryResolve);
+    if (MH_CreateHook(target, reinterpret_cast<void*>(&EntryResolveDetour),
+                      reinterpret_cast<void**>(&g_originalEntryResolve)) != MH_OK ||
+        MH_EnableHook(target) != MH_OK) {
+        Log("ERROR: cannot hook the inventory entry lookup");
+    }
 }
 
 // What the inventory code will find for this item (nullptr: it would crash), using the game's own
@@ -306,8 +339,13 @@ void GiveItem(const void* controller, int id, const Reply& reply) {
 
 }  // namespace
 
+bool ChoicePending() {
+    return !g_pickToken.empty() && g_pickChoice < 0;
+}
+
 void Tick(const void* controller) {
     EnsureAcceptHook();
+    EnsureMissingItemGuard();
     if (g_choiceContainer && SearchedContainer(controller) != g_choiceContainer) {
         DestroyChoiceContainer();
         g_nextScreenAt = GetTickCount() + 20000;  // cancelled: ask again later
@@ -323,19 +361,10 @@ void Tick(const void* controller) {
     }
     if (!playingSince) playingSince = GetTickCount() | 1;
     if (GetTickCount() - playingSince < 5000) return;
+    // Another screen open, pause menu...: try again in 3 s.
     if (!g_choiceContainer && static_cast<int>(GetTickCount() - g_nextScreenAt) >= 0) {
         g_nextScreenAt = GetTickCount() + 3000;
-        apnotify::SetInfusionPrompt(!OpenChoiceScreen(controller));
-    }
-    static bool down[3] = {};
-    const int keys[3] = {VK_F9, VK_F10, VK_F11};
-    const bool focus = GameHasFocus();
-    for (int i = 0; i < 3; ++i) {
-        const bool now = focus && (GetAsyncKeyState(keys[i]) & 0x8000) != 0;
-        if (now && !down[i] && g_pickChoice < 0 && AcceptChoice(controller, i)) {
-            Log("inventory: Infusion chosen: %d (item %d)", i, kInfusionChoices[i]);
-        }
-        down[i] = now;
+        OpenChoiceScreen(controller);
     }
 }
 
@@ -366,7 +395,6 @@ bool Command(const std::string& cmd, const std::string& arg, const void* control
                 g_pickToken.clear();
                 g_pickChoice = -1;
             }
-            apnotify::SetInfusionPrompt(false);
             reply("infusionpick wait " + arg);
         } else if (arg != g_pickToken) {
             g_pickToken = arg;  // new Infusion (or first time): ask (Tick)

@@ -111,6 +111,14 @@ constexpr std::uintptr_t kRvaAkPostEvent =
 // manager, 64-bit id, ret 8). nullptr when not loaded: giving it then crashes the game.
 constexpr std::uintptr_t kRvaItemResolve = 0x80BF10u;
 constexpr std::uintptr_t kRvaItemManager = 0x1006B48u;
+// The same lookup for an inventory entry ({low, high} id in ecx, __thiscall). When Booker changes
+// pawn (zone change), the controller gives its weapon upgrades and gear to the new one through it,
+// without checking for nullptr: an item received before its level (Vox Heater upgrade) crashes there.
+constexpr std::uintptr_t kRvaInventoryEntryResolve = 0x80D3A0u;
+constexpr std::uintptr_t kRvaApplyUpgradeCallSite = 0x5877D6u;  // return address, upgrades loop
+constexpr std::uintptr_t kRvaApplyGearCallSite = 0x587855u;     // return address, gear loop
+constexpr std::size_t kUpgradeWeaponList = 0xE4u;               // read by the upgrade loop: none = nothing to do
+constexpr std::size_t kGearApplySlot = 0xA0u / 4u;              // virtual, __thiscall(controller, 1, 4)
 
 // Sizes of the vending machines' UnrealScript structs (read from the reflection).
 constexpr std::size_t kSizeofVendingMachineItem = 0x0Cu;  // LootItem, ItemCost, ItemsAvailable

@@ -20,10 +20,6 @@ namespace bsap::apnotify {
 void Push(const apclient::Notice& notice);
 void Tick(const void* controller);
 
-// A received Infusion waits for a choice (inventory): while true, the "choose: F9 = Health,
-// F10 = Shield, F11 = Salts" message comes back, alternating with the other messages.
-void SetInfusionPrompt(bool active);
-
 // Shield picked for an Infusion before Booker has one: "no shield yet".
 void ShowNoShield();
 

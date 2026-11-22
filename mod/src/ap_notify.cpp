@@ -35,7 +35,6 @@ struct Texts {
     const wchar_t* goal;
     const wchar_t* lost;
     const wchar_t* reconnected;
-    const wchar_t* infusionPrompt;
     const wchar_t* noShield;
     const wchar_t* tearsLocked;
     const wchar_t* passLocked;  // %1 = pass
@@ -46,14 +45,12 @@ const Texts kTexts[] = {
     {"INT", L"Received: ", L" (from %2)", L"Sent %1 to %2", L"Found: %1", L"Killed by DeathLink (%2): %3",
      L"Killed by DeathLink: %2 died.", L"Goal complete! Your Archipelago game is finished.",
      L"Lost connection to Archipelago, reconnecting...", L"Reconnected to Archipelago.",
-     L"Infusion received! Choose: F9 = Health, F10 = Shield, F11 = Salts",
      L"You don't have your shield yet: choose Health or Salts.",
      L"Elizabeth can't open Tears yet: find the Elizabeth's Tears item.", L"You can't go further yet: you need the %1.",
      L"Elizabeth can't pick locks yet: find the Lockpicking item."},
     {"FRA", L"Reçu : ", L" (de %2)", L"Envoyé : %1 à %2", L"Trouvé : %1", L"Tué par DeathLink (%2) : %3",
      L"Tué par DeathLink : %2 est mort.", L"Objectif atteint ! Ta partie Archipelago est terminée.",
      L"Connexion à Archipelago perdue, reconnexion...", L"Reconnecté à Archipelago.",
-     L"Infusion reçue ! Choisis : F9 = Santé, F10 = Bouclier, F11 = Sels",
      L"Tu n'as pas encore ton bouclier : choisis Santé ou Sels.",
      L"Elizabeth ne peut pas encore ouvrir de failles : trouve l'objet Elizabeth's Tears.",
      L"Tu ne peux pas encore aller plus loin : il te faut le %1.",
@@ -61,7 +58,6 @@ const Texts kTexts[] = {
     {"DEU", L"Erhalten: ", L" (von %2)", L"Gesendet: %1 an %2", L"Gefunden: %1", L"Durch DeathLink getötet (%2): %3",
      L"Durch DeathLink getötet: %2 ist gestorben.", L"Ziel erreicht! Dein Archipelago-Spiel ist abgeschlossen.",
      L"Verbindung zu Archipelago verloren, verbinde neu...", L"Wieder mit Archipelago verbunden.",
-     L"Infusion erhalten! Wähle: F9 = Gesundheit, F10 = Schild, F11 = Salze",
      L"Du hast noch keinen Schild: Wähle Gesundheit oder Salze.",
      L"Elizabeth kann noch keine Risse öffnen: Finde den Gegenstand Elizabeth's Tears.",
      L"Du kannst noch nicht weiter: Du brauchst den %1.",
@@ -69,7 +65,6 @@ const Texts kTexts[] = {
     {"ITA", L"Ricevuto: ", L" (da %2)", L"Inviato: %1 a %2", L"Trovato: %1", L"Ucciso dal DeathLink (%2): %3",
      L"Ucciso dal DeathLink: %2 è morto.", L"Obiettivo raggiunto! La tua partita Archipelago è finita.",
      L"Connessione ad Archipelago persa, riconnessione...", L"Riconnesso ad Archipelago.",
-     L"Infusione ricevuta! Scegli: F9 = Salute, F10 = Scudo, F11 = Sali",
      L"Non hai ancora lo scudo: scegli Salute o Sali.",
      L"Elizabeth non può ancora aprire gli squarci: trova l'oggetto Elizabeth's Tears.",
      L"Non puoi ancora proseguire: ti serve il %1.",
@@ -77,7 +72,6 @@ const Texts kTexts[] = {
     {"ESN", L"Recibido: ", L" (de %2)", L"Enviado: %1 a %2", L"Encontrado: %1", L"Muerto por DeathLink (%2): %3",
      L"Muerto por DeathLink: %2 ha muerto.", L"¡Objetivo cumplido! Tu partida de Archipelago ha terminado.",
      L"Conexión con Archipelago perdida, reconectando...", L"Reconectado a Archipelago.",
-     L"¡Infusión recibida! Elige: F9 = Salud, F10 = Escudo, F11 = Sales",
      L"Aún no tienes el escudo: elige Salud o Sales.",
      L"Elizabeth aún no puede abrir desgarros: encuentra el objeto Elizabeth's Tears.",
      L"Aún no puedes seguir: necesitas el %1.",
@@ -99,8 +93,6 @@ struct Queued {
 std::deque<Queued> g_queue;
 std::wstring g_current;  // ready, waiting to be shown
 DWORD g_nextAt = 0;
-bool g_prompt = false;
-bool g_promptTurn = true;
 
 // Latin-1 is kept, the rest decomposed (Ã© -> e) or "?". Brackets are for keys ([Jump]...), so they
 // become parentheses.
@@ -242,11 +234,6 @@ void Push(const apclient::Notice& notice) {
     g_queue.push_back({notice, GetTickCount()});
 }
 
-void SetInfusionPrompt(bool active) {
-    if (active && !g_prompt) g_promptTurn = true;
-    g_prompt = active;
-}
-
 void ShowNoShield() {
     g_current = Lang().noShield;
     g_nextAt = GetTickCount();
@@ -270,22 +257,9 @@ void ShowPassLocked(const wchar_t* pass) {
 }
 
 void Tick(const void* controller) {
-    if (g_queue.empty() && g_current.empty() && !g_prompt) return;
+    if (g_queue.empty() && g_current.empty()) return;
     const DWORD now = GetTickCount();
     if (static_cast<int>(now - g_nextAt) < 0) return;
-    if (g_prompt && g_current.empty() && (g_promptTurn || g_queue.empty())) {
-        if (!PlayerReady(controller)) return;
-        constexpr float kPromptSeconds = 8.0f;
-        if (Display(controller, Lang().infusionPrompt, kPromptSeconds)) {
-            g_promptTurn = false;
-            g_nextAt = now + static_cast<DWORD>(kPromptSeconds * 1000.0f) + 500;
-        } else {
-            g_nextAt = now + 2000;
-        }
-        return;
-    }
-    g_promptTurn = true;
-    if (g_queue.empty() && g_current.empty()) return;
     if (g_current.empty() && g_queue.front().notice.kind == Kind::DeathLink &&
         now - g_queue.front().at < kDeathLinkDelayMs)
         return;
