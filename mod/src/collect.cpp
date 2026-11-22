@@ -3,6 +3,7 @@
 #include "bridge.h"
 #include "game_build.h"
 #include "log.h"
+#include "vigors.h"
 
 #include "MinHook.h"
 #include "ue3.h"
@@ -230,10 +231,46 @@ namespace {
 using OpenSearch_t = void(__fastcall*)(void* controller, void* edx, void* container);
 OpenSearch_t g_originalOpenSearch[3] = {};
 
-bool SkipSearch(const void* container) {
-    if (g_apInfusions.empty() && g_apGear.empty()) return false;
-    if (!ue3::IsObject(container) || ue3::ClassName(container) != "XLootContainerKActor") return false;
+// Locked Vigor in a bottle or an enemy's drop: from the archetype, else the loot list.
+const char* LockedVigorIn(const void* container, const std::string& archetype) {
+    if (const char* key = vigors::LockedKey(archetype)) return key;
+    ue3::Property p;
+    ue3::ArrayHeader list{};
+    if (!ue3::FindProperty(container, "LootDefinitionList", &p) ||
+        !ue3::ReadBytes(static_cast<const std::uint8_t*>(container) + p.offset, &list, sizeof(list))) {
+        return nullptr;
+    }
+    for (int i = 0; i < list.num && i < 8; ++i) {
+        const void* loot = nullptr;
+        ue3::ReadBytes(list.data + i * sizeof(void*), &loot, sizeof(loot));
+        if (const char* key = vigors::LockedKey(ue3::ObjectName(loot))) return key;
+    }
+    return nullptr;
+}
+
+void SetLooted(const void* container) {
+    using SetLooted_t = void(__fastcall*)(const void* self, void* edx);
+    const auto base = reinterpret_cast<std::uintptr_t>(GetModuleHandleA(nullptr));
+    reinterpret_cast<SetLooted_t>(base + build::kRvaReactiveActorSetLooted)(container, nullptr);
+}
+
+// Locked Vigor: taken without the drinking animation and tutorial (vigors would remove it right
+// after anyway). SetLooted still fires the container's Kismet events.
+bool TakeLockedVigor(const void* container, const char* how) {
     const std::string archetype = ArchetypeName(container);
+    const char* key = LockedVigorIn(container, archetype);
+    if (!key) return false;
+    SetLooted(container);
+    Log("collect: locked Vigor %s taken without drinking (%s, %s)", key, archetype.c_str(), how);
+    bridge::Send(std::string("event vigor ") + key);
+    return true;
+}
+
+bool SkipSearch(const void* container) {
+    if (!ue3::IsObject(container) || ue3::ClassName(container) != "XLootContainerKActor") return false;
+    if (TakeLockedVigor(container, "search")) return true;
+    const std::string archetype = ArchetypeName(container);
+    if (g_apInfusions.empty() && g_apGear.empty()) return false;
     const std::set<std::string>* ap = nullptr;
     const char* kind = nullptr;
     if (archetype == kInfusionArchetype) {
@@ -246,9 +283,7 @@ bool SkipSearch(const void* container) {
     if (!ap) return false;
     const std::string id = PlacedId(container);
     if (!ap->count(Lower(id))) return false;
-    using SetLooted_t = void(__fastcall*)(const void* self, void* edx);
-    const auto base = reinterpret_cast<std::uintptr_t>(GetModuleHandleA(nullptr));
-    reinterpret_cast<SetLooted_t>(base + build::kRvaReactiveActorSetLooted)(container, nullptr);
+    SetLooted(container);
     Log("collect: AP %s looted without screen: %s", kind, id.c_str());
     bridge::Send(std::string("event ") + kind + " " + id);
     return true;
@@ -279,6 +314,25 @@ void EnsureOpenSearchHook() {
 }
 
 }  // namespace
+
+bool Intercept(const void* self, const void* func, const void* parms) {
+    (void)self;
+    if (!parms) return false;
+    static std::map<const void*, bool> isUse;  // per UFunction
+    auto it = isUse.find(func);
+    if (it == isUse.end()) it = isUse.emplace(func, ue3::ObjectName(func) == "ServerStartUsingButtonUseTarget").first;
+    if (!it->second) return false;
+    const void* target = *static_cast<const void* const*>(parms);  // UsableObject, first parameter
+    if (!ue3::IsObject(target)) return false;
+    if (ue3::ClassName(target) != "XLootContainerKActor") {
+        if (LockedVigorIn(target, ArchetypeName(target))) {
+            Log("collect: locked Vigor in a %s, not taken (%s)", ue3::ClassName(target).c_str(),
+                ue3::PathName(target).c_str());
+        }
+        return false;
+    }
+    return TakeLockedVigor(target, "use");
+}
 
 bool Command(const std::string& cmd, const std::string& arg, const Reply& reply) {
     if (cmd == "voxophones") {

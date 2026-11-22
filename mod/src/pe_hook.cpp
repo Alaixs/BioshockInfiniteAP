@@ -2,6 +2,7 @@
 
 #include "ap_menu.h"
 #include "areas.h"
+#include "collect.h"
 #include "game_build.h"
 #include "lockpick.h"
 #include "log.h"
@@ -38,7 +39,8 @@ bool Blocked(void* self, void* func, void* parms) {
     try {
         trace::Observe(self, func);
         return shop::Intercept(self, func) || traps::Intercept(self, func) || apmenu::Intercept(self, func) ||
-               tears::Intercept(self, func) || areas::Intercept(self, func) || lockpick::Intercept(self, func, parms);
+               tears::Intercept(self, func) || areas::Intercept(self, func) || lockpick::Intercept(self, func, parms) ||
+               collect::Intercept(self, func, parms);
     } catch (const std::exception& e) {
         LogError(e.what());
     } catch (...) {

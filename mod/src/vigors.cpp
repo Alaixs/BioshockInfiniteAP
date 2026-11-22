@@ -255,6 +255,14 @@ void Tick(const void* controller) {
     RegiveOwned(slots);
 }
 
+const char* LockedKey(const std::string& name) {
+    const std::string lower = Lower(name);
+    const std::size_t at = lower.find("plasmid_");
+    if (at == std::string::npos || lower.find(kLoanedSuffix) != std::string::npos) return nullptr;
+    const char* key = KeyOf(lower.substr(at));
+    return key && g_locked.count(key) ? key : nullptr;
+}
+
 bool Command(const std::string& cmd, const std::string& arg, const void* controller, const Reply& reply) {
     if (cmd == "vigorlock") {
         if (arg == "clear")
