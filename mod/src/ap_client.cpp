@@ -13,6 +13,7 @@
 #include <fstream>
 #include <map>
 #include <optional>
+#include <random>
 #include <set>
 #include <sstream>
 #include <tuple>
@@ -30,6 +31,11 @@ constexpr DWORD kSyncDelayMs = 1000;  // resync once the replies are in
 constexpr DWORD kReconnectMs = 5000;
 constexpr int kStatusGoal = 30;         // ClientStatus.CLIENT_GOAL
 constexpr DWORD kDeathGraceMs = 10000;  // a death we just caused is not sent back
+constexpr DWORD kKillRetryMs = 1000;    // death refused (cutscene): next try
+// Story order of the areas (apworld data.AREAS). The game never goes back to an area left behind.
+constexpr const char* kAreas[] = {"Town Center", "Monument Island", "Battleship Bay",
+                                  "Finkton",     "Emporia",         "Hand of the Prophet"};
+constexpr std::size_t kCatchUpRowsPerMachine = 5;  // rows of areas left behind, per loaded machine
 
 State g_state = State::Idle;
 Failure g_failure = Failure::None;
@@ -44,7 +50,9 @@ std::map<int, std::string> g_slotGame, g_alias;
 std::map<std::string, std::map<std::int64_t, std::string>> g_itemNames;      // game -> id -> name
 std::map<std::string, std::map<std::int64_t, std::string>> g_locationNames;  // game -> id -> name
 json g_slotData;
-std::vector<std::int64_t> g_items;  // received items, in the server's order
+std::map<std::int64_t, int> g_locationArea;  // location -> index in kAreas (slot_data "areas")
+int g_pricePercent = 100;                    // price_percent= in BioShockAP.ini
+std::vector<std::int64_t> g_items;           // received items, in the server's order
 std::set<std::int64_t> g_checked, g_missing;
 struct Scout {
     std::int64_t item;
@@ -104,11 +112,23 @@ void Notify(Notice::Kind kind, const std::string& item = {}, const std::string& 
 }
 
 std::string g_pendingDeathSource;
-bool g_pendingDeathAnnounced = false;
 bool g_deathLink = false;
 std::optional<std::string> g_pendingDeath;  // death received, applied as soon as in game
 bool g_killInFlight = false;
 DWORD g_killedAt = 0;
+bool g_killRefused = false;  // the game refused the death (cutscene): try again later
+DWORD g_killRefusedAt = 0;
+
+// Traps received, fired one at a time at random moments once Booker is in game (not in the
+// menus, where an auto-connection replays the ones received offline, nor during a load), and not
+// while a vending screen or the Infusion choice is open (the mod defers them). Kept in the
+// session state until fired.
+std::vector<std::string> g_pendingTraps;
+TrapDelays g_trapDelays = {15000, 60000, 20000, 60000};
+constexpr DWORD kTrapRetryMinMs = 5000;  // deferred by a screen
+constexpr DWORD kTrapRetryMaxMs = 15000;
+DWORD g_nextTrapAt = 0;  // 0: not scheduled
+bool g_trapInFlight = false;
 
 std::wstring Wide(const std::string& s) {
     if (s.empty()) return {};
@@ -148,7 +168,7 @@ std::string DllDir() {
     return dir.substr(0, dir.find_last_of("\\/") + 1);
 }
 
-// BioShockAP.ini: address=, password=, autoconnect=, uuid=, debug= (UTF-8).
+// BioShockAP.ini: address=, password=, autoconnect=, uuid=, debug=, price_percent= (UTF-8).
 std::map<std::string, std::string> ReadConfig() {
     std::map<std::string, std::string> values;
     std::ifstream f(DllDir() + "BioShockAP.ini", std::ios::binary);
@@ -420,6 +440,11 @@ void OnCurrencyGiven() {
     g_given = std::max(g_given, static_cast<int>(i + 1));  // the mod wrote the same value in the save
 }
 
+int AreaOf(std::int64_t loc) {
+    const auto it = g_locationArea.find(loc);
+    return it == g_locationArea.end() ? -1 : it->second;
+}
+
 void SyncShop() {
     const std::vector<std::int64_t> all = ShopLocations();
     if (!g_scouted && !all.empty()) {
@@ -428,6 +453,9 @@ void SyncShop() {
     }
     const auto machines = ShopMachines();
     const json prices = g_slotData.value("prices", json::object());
+    const auto priceOf = [&](std::int64_t loc) {
+        return (std::max)(1, prices.value(std::to_string(loc), 10) * g_pricePercent / 100);
+    };
     std::vector<std::string> loaded;
     for (const std::string& path : g_machines) {
         if (machines.count(Lower(path))) loaded.push_back(path);
@@ -435,18 +463,36 @@ void SyncShop() {
     std::sort(loaded.begin(), loaded.end());
     std::vector<ShopLine> wanted;
     std::set<std::int64_t> placed;  // two versions of a machine loaded: rows on the first one
+    const auto add = [&](std::int64_t loc, const std::string& path) {
+        const std::string id = std::to_string(loc);
+        std::string name = "Archipelago Item";
+        if (const auto s = g_scouts.find(loc); s != g_scouts.end()) {
+            name = ItemName(s->second.item, s->second.player);
+            if (s->second.player != g_slot) name += " (" + g_alias[s->second.player] + ")";
+        }
+        wanted.emplace_back(id, path, priceOf(loc), ShopText(name), g_checked.count(loc) > 0);
+    };
+    int here = -1;  // furthest area of the loaded machines
     for (const std::string& path : loaded) {
         for (const std::int64_t loc : machines.at(Lower(path))) {
-            if (!placed.insert(loc).second) continue;
-            const std::string id = std::to_string(loc);
-            std::string name = "Archipelago Item";
-            if (const auto s = g_scouts.find(loc); s != g_scouts.end()) {
-                name = ItemName(s->second.item, s->second.player);
-                if (s->second.player != g_slot) name += " (" + g_alias[s->second.player] + ")";
-            }
-            wanted.emplace_back(id, path, prices.value(id, 10), ShopText(name), g_checked.count(loc) > 0);
+            here = (std::max)(here, AreaOf(loc));
+            if (placed.insert(loc).second) add(loc, path);
         }
     }
+    // Catch-up: rows not bought in the areas left behind come back on the loaded machines, cheapest
+    // first. The logic doesn't change (what was reachable stays reachable) and nothing is lost.
+    std::vector<std::pair<int, std::int64_t>> behind;  // price, location
+    for (const auto& [path, locs] : machines) {
+        for (const std::int64_t loc : locs) {
+            const int area = AreaOf(loc);
+            if (area >= 0 && area < here && !g_checked.count(loc) && placed.insert(loc).second) {
+                behind.emplace_back(priceOf(loc), loc);
+            }
+        }
+    }
+    std::sort(behind.begin(), behind.end());
+    behind.resize((std::min)(behind.size(), loaded.size() * kCatchUpRowsPerMachine));
+    for (std::size_t i = 0; i < behind.size(); ++i) add(behind[i].second, loaded[i % loaded.size()]);
     if (g_sentShop && *g_sentShop == wanted) return;
     bridge::Inject("shopclear");
     for (const auto& [id, machine, price, name, sold] : wanted) {
@@ -532,16 +578,64 @@ void OnDeath() {
     Log("[ap] DeathLink: death sent to the other players");
 }
 
+// Not during a load or a cutscene (Booker is invulnerable then). Announced when it happens.
 void ApplyPendingDeath() {
     if (!g_pendingDeath || g_killInFlight || !g_inLevel) return;
-    Log("[ap] DeathLink: %s", g_pendingDeath->c_str());
-    if (!g_pendingDeathAnnounced) {  // announced once, even if the game must retry
-        Notify(Notice::Kind::DeathLink, {}, g_pendingDeathSource, *g_pendingDeath);
-        g_pendingDeathAnnounced = true;
-    }
+    if (g_killRefused && GetTickCount() - g_killRefusedAt < kKillRetryMs) return;
     g_killInFlight = true;
     g_killedAt = GetTickCount();
     bridge::Inject("kill");
+}
+
+DWORD RandomMs(DWORD low, DWORD high) {
+    static std::mt19937 rng(GetTickCount());
+    return high > low ? std::uniform_int_distribution<DWORD>(low, high)(rng) : low;
+}
+
+void SaveTraps() {
+    json state = SessionState();
+    if (g_pendingTraps.empty()) {
+        state.erase("traps");
+    } else {
+        state["traps"] = g_pendingTraps;
+    }
+    SaveSessionState(state);
+}
+
+void ApplyPendingTraps() {
+    const DWORD now = GetTickCount();
+    if (g_gameOver && !g_pendingTraps.empty()) {
+        g_pendingTraps.clear();
+        SaveTraps();
+    }
+    if (g_pendingTraps.empty() || !g_inLevel) {
+        g_nextTrapAt = 0;  // scheduled again once in game
+        return;
+    }
+    if (g_trapInFlight) return;
+    if (!g_nextTrapAt) {
+        g_nextTrapAt = (now + RandomMs(g_trapDelays.firstMin, g_trapDelays.firstMax)) | 1;
+        return;
+    }
+    if (static_cast<int>(now - g_nextTrapAt) < 0) return;
+    g_trapInFlight = true;
+    bridge::Inject("trap " + g_pendingTraps.front());
+}
+
+// Reply of the mod to "trap": fired (next one later), or deferred by an open screen.
+void OnTrapReply(bool fired) {
+    g_trapInFlight = false;
+    const DWORD now = GetTickCount();
+    if (!fired) {
+        g_nextTrapAt = (now + RandomMs(kTrapRetryMinMs, kTrapRetryMaxMs)) | 1;
+        return;
+    }
+    if (!g_pendingTraps.empty()) {
+        Log("[ap] trap fired: %s", g_pendingTraps.front().c_str());
+        g_pendingTraps.erase(g_pendingTraps.begin());
+        SaveTraps();
+    }
+    g_nextTrapAt = (now + RandomMs(g_trapDelays.gapMin, g_trapDelays.gapMax)) | 1;
 }
 
 // Kept on disk, sent now or on the next connection.
@@ -646,14 +740,29 @@ void OnModLine(const std::string& line) {
         if (a != b) g_sentShop.reset();
         g_machines = std::move(g_incomingMachines);
         g_incomingMachines.clear();
+    } else if (g_trapInFlight && line.rfind("ok trap ", 0) == 0) {
+        OnTrapReply(true);
+    } else if (g_trapInFlight && line.rfind("err trap deferred", 0) == 0) {
+        OnTrapReply(false);
     } else if (parts[0] == "event" && parts.size() >= 2 && parts[1] == "shopfail") {
         Log("[ap] not enough Silver Eagles for this row");
     } else if (parts[0] == "event" && parts.size() >= 2 && parts[1] == "death") {
         OnDeath();
     } else if (g_killInFlight && parts[0] == "called" && line.find(".Suicide(") != std::string::npos) {
         g_killInFlight = false;
+        g_killRefused = false;
         g_killedAt = GetTickCount();
+        if (g_pendingDeath) {
+            Log("[ap] DeathLink: %s", g_pendingDeath->c_str());
+            Notify(Notice::Kind::DeathLink, {}, g_pendingDeathSource, *g_pendingDeath);
+        }
         g_pendingDeath.reset();
+    } else if (g_killInFlight && line.rfind("err cutscene", 0) == 0) {
+        g_killInFlight = false;  // kept: applied once the cutscene ends
+        g_killedAt = 0;          // nobody died: a real death of Booker is still sent
+        if (!g_killRefused) Log("[ap] DeathLink: cutscene in progress, death applied when it ends");
+        g_killRefused = true;
+        g_killRefusedAt = GetTickCount();
     } else if (g_killInFlight && line.rfind("err no character", 0) == 0) {
         g_killInFlight = false;  // loading: try again once back in game
         g_inLevel = false;
@@ -706,6 +815,14 @@ void OnPacket(const json& p) {
         g_checked = {checked.begin(), checked.end()};
         g_missing = {missing.begin(), missing.end()};
         g_slotData = p.value("slot_data", json::object());
+        g_locationArea.clear();
+        const json areas = g_slotData.value("areas", json::object());  // not items() on a temporary
+        for (int i = 0; i < static_cast<int>(std::size(kAreas)); ++i) {
+            for (const std::int64_t loc : areas.value(kAreas[i], std::vector<std::int64_t>{})) g_locationArea[loc] = i;
+        }
+        const int percent = std::atoi(ReadConfig()["price_percent"].c_str());
+        g_pricePercent = percent > 0 ? (std::min)(percent, 1000) : 100;
+        if (g_pricePercent != 100) Log("[ap] shop prices at %d%% (price_percent in BioShockAP.ini)", g_pricePercent);
         g_items.clear();
         g_scouts.clear();
         g_sentLocks.reset();
@@ -742,6 +859,9 @@ void OnPacket(const json& p) {
         }
         g_sessionKey = g_seed + ":" + std::to_string(g_team) + ":" + std::to_string(g_slot);
         g_gameOver = SessionState().value("goal_done", false);
+        g_pendingTraps = SessionState().value("traps", std::vector<std::string>{});
+        g_nextTrapAt = 0;
+        g_trapInFlight = false;
         std::vector<std::int64_t> unsent;
         for (const std::int64_t loc : LocalChecks()) {
             if (!g_checked.count(loc)) unsent.push_back(loc);
@@ -802,11 +922,12 @@ void OnPacket(const json& p) {
             if (g_items.size() > announced) {
                 const int sender = item.value("player", 0);
                 Log("[ap] received: %s (from %s)", ItemName(id, g_slot).c_str(), g_alias[sender].c_str());
-                // Traps fire once, on receipt (or on reconnection if they came in offline).
+                // Traps fire once, on receipt (or on reconnection if they came in offline), as soon
+                // as Booker is in game.
                 if (!g_gameOver) {
                     const json traps = g_slotData.value("traps", json::object());
                     if (const auto trap = traps.find(std::to_string(id)); trap != traps.end()) {
-                        bridge::Inject("trap " + trap->get<std::string>());
+                        g_pendingTraps.push_back(trap->get<std::string>());
                     }
                 }
                 // Our own item found in a Dollar Bill: the purchase is enough, no announcement.
@@ -816,6 +937,7 @@ void OnPacket(const json& p) {
         }
         if (g_items.size() > announced) {
             state["announced"] = g_items.size();
+            if (!g_pendingTraps.empty()) state["traps"] = g_pendingTraps;
             SaveSessionState(state);
         }
         if (index == 0) Log("[ap] %zu item(s) received since the start of the seed", g_items.size());
@@ -841,7 +963,6 @@ void OnPacket(const json& p) {
             if (source == g_address.name) return;  // the echo of our own death
             g_pendingDeath = data.value("cause", "");
             g_pendingDeathSource = source;
-            g_pendingDeathAnnounced = false;
         }
     } else if (cmd == "PrintJSON") {
         std::string text;
@@ -1077,6 +1198,7 @@ void Tick() {
         g_syncAt = now + kSyncDelayMs;
     }
     ApplyPendingDeath();
+    ApplyPendingTraps();
     if (g_syncAt && static_cast<int>(now - g_syncAt) >= 0) {
         g_syncAt = 0;
         try {
@@ -1085,6 +1207,10 @@ void Tick() {
             Log("[ap] error during the sync: %s", ex.what());
         }
     }
+}
+
+void SetTrapDelays(const TrapDelays& delays) {
+    g_trapDelays = delays;
 }
 
 }  // namespace bsap::apclient

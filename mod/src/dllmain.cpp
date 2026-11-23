@@ -88,6 +88,18 @@ const void* PawnOf(const void* controller) {
     return owner ? ue3::ObjectField(owner, p) : nullptr;
 }
 
+// Cutscene (Matinee camera), scripted sequence or any invulnerability flag (XPawn.InvulnerableState:
+// 4, 8 or 12 seen in cutscenes and right around them, 0 in play): Suicide would only set Booker's
+// health to zero without killing him, and he would play on at zero health.
+bool InCutscene(const void* controller, const void* pawn) {
+    ue3::Property p;
+    if (ue3::FindProperty(controller, "XMatineeViewTarget", &p) && ue3::ObjectField(controller, p)) return true;
+    if (!pawn) return false;
+    if (ue3::FindProperty(pawn, "PlayingScriptedSequence", &p) && ue3::ObjectField(pawn, p)) return true;
+    return ue3::FindProperty(pawn, "InvulnerableState", &p) &&
+           *reinterpret_cast<const std::int32_t*>(static_cast<const std::uint8_t*>(pawn) + p.offset) != 0;
+}
+
 // An object given by a path: "" = the controller, "Pawn", "Pawn.InvManager", "#1234".
 const void* ResolveObject(const void* controller, const std::string& path) {
     if (path.empty()) {
@@ -188,6 +200,8 @@ void Execute(const void* controller, const std::string& line) {
     } else if (cmd == "kill") {
         if (!PawnOf(controller)) {
             Reply("err no character to kill");
+        } else if (InCutscene(controller, PawnOf(controller))) {
+            Reply("err cutscene in progress");
         } else {
             engine::Call(controller, "Suicide", {}, Reply);
         }

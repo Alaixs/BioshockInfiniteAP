@@ -1,14 +1,18 @@
 #include "traps.h"
 
 #include "ap_texture.h"
+#include "engine_call.h"
 #include "game_build.h"
+#include "inventory.h"
 #include "log.h"
+#include "shop.h"
 #include "ue3.h"
 
 #include <windows.h>
 
 #include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <map>
 #include <sstream>
 #include <string>
@@ -40,8 +44,10 @@ DWORD g_until[kCount] = {};
 bool g_disarmApplied = false;
 bool g_disarmSaved = false;
 std::map<const void*, std::map<std::string, float>> g_lizSaved;
-// Walk only: JumpZ 0, and a sprint threshold above the maximum input (1). Sky-Lines still work.
-const std::pair<const char*, float> kWalkValues[] = {{"JumpZ", 0.0f}, {"SprintEnterInputThreshold", 5.0f}};
+// Walk only: JumpZ 0, and sprint thresholds above the maximum input (1): no sprint starts, and one
+// already running ends. Sky-Lines still work.
+const std::pair<const char*, float> kWalkValues[] = {
+    {"JumpZ", 0.0f}, {"SprintEnterInputThreshold", 5.0f}, {"SprintExitInputThreshold", 5.0f}};
 std::map<const void*, std::map<std::string, float>> g_walkSaved;
 
 bool Active(Kind k) {
@@ -71,6 +77,25 @@ bool SetBool(const void* obj, const char* name, bool on, bool* before) {
     return true;
 }
 
+// The lock puts the guns away (EquippedWeaponIndex -1) and clearing it doesn't take them out
+// again: Booker would stay empty-handed. XPawn.ReEquipAllWeapons does, if he has none in hand.
+void ReEquipWeapons(const void* controller) {
+    ue3::Property p;
+    const void* pawn = ue3::FindProperty(controller, "Pawn", &p) ? ue3::ObjectField(controller, p) : nullptr;
+    if (!ue3::IsObject(pawn)) return;
+    const void* inHand = ue3::FindFunction(pawn, "GetRHEquippedXWeapon");
+    const void* reequip = ue3::FindFunction(pawn, "ReEquipAllWeapons");
+    if (!inHand || !reequip) return;
+    alignas(16) std::uint8_t parms[64] = {};
+    if (!engine::CallRaw(pawn, inHand, parms)) return;
+    const void* weapon = nullptr;
+    std::memcpy(&weapon, parms, sizeof(weapon));
+    if (ue3::IsObject(weapon)) return;
+    std::memset(parms, 0, sizeof(parms));
+    engine::CallRaw(pawn, reequip, parms);
+    Log("traps: weapons equipped again after disarm");
+}
+
 void ApplyDisarm(const void* controller, bool on) {
     if (on && !g_disarmApplied) {
         g_disarmApplied = SetBool(controller, "bWeaponInputDisabledByScript", true, &g_disarmSaved);
@@ -79,6 +104,7 @@ void ApplyDisarm(const void* controller, bool on) {
     } else if (g_disarmApplied) {
         SetBool(controller, "bWeaponInputDisabledByScript", g_disarmSaved, nullptr);
         g_disarmApplied = false;
+        if (!g_disarmSaved) ReEquipWeapons(controller);
     }
 }
 
@@ -141,7 +167,13 @@ void ApplyWalk(const void* controller, bool on) {
     std::string err;
     const void* owner = ue3::ResolvePath(controller, "Pawn", &p, &err);
     const void* pawn = owner ? ue3::ObjectField(owner, p) : nullptr;
-    if (ue3::IsObject(pawn)) Override(pawn, kWalkValues, std::size(kWalkValues), &g_walkSaved);
+    if (!ue3::IsObject(pawn)) return;
+    if (!g_walkSaved.count(pawn)) {  // trap start (or a new pawn): stop the sprint in progress
+        const void* stop = ue3::FindFunction(controller, "StopSprint");
+        alignas(16) std::uint8_t parms[16] = {};
+        if (stop) engine::CallRaw(controller, stop, parms);
+    }
+    Override(pawn, kWalkValues, std::size(kWalkValues), &g_walkSaved);
 }
 
 // Boys of Silence scream. The Comstock House guards' scream (first sound of Silence_Scream_Turret)
@@ -250,9 +282,13 @@ bool Command(const std::string& cmd, const std::string& line, const void* contro
         reply("ok trap sound " + std::to_string(event));
         return true;
     }
-    if (type == "scream") {  // instant
+    if (type == "scream" && !shop::GrantsBlocked() && !inventory::ChoicePending()) {  // instant
         Scream();
         reply("ok trap scream");
+        return true;
+    }
+    if (shop::GrantsBlocked() || inventory::ChoicePending()) {  // the client tries again later
+        reply("err trap deferred: screen open");
         return true;
     }
     for (int k = 0; k < kCount; ++k) {
@@ -296,7 +332,7 @@ void Tick(const void* controller) {
 
 bool Intercept(const void* self, const void* func) {
     (void)self;
-    if (!Active(kJam) && !Active(kNoVigor) && !Active(kLizStrike)) return false;
+    if (!Active(kJam) && !Active(kNoVigor) && !Active(kLizStrike) && !Active(kWalk)) return false;
     static std::unordered_map<const void*, int> kinds;  // function -> trap blocking it (-1: none)
     auto it = kinds.find(func);
     if (it == kinds.end()) {
@@ -305,6 +341,7 @@ bool Intercept(const void* self, const void* func) {
                  .emplace(func, name == "StartFireWeapon"              ? kJam
                                 : name == "StartFirePlasmid"           ? kNoVigor
                                 : name == "XPerformSubstantiateObject" ? kLizStrike  // Tears too
+                                : name == "StartSprint"                ? kWalk
                                                                        : -1)
                  .first;
     }

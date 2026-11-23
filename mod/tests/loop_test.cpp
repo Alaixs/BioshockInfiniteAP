@@ -19,6 +19,7 @@
 #include <windows.h>
 
 #include <algorithm>
+#include <cctype>
 #include <cstdio>
 #include <deque>
 #include <fstream>
@@ -82,6 +83,8 @@ struct FakeGame {
     std::string pickToken;  // Infusion to choose (infusionpick)
     int pickChoice = -1;    // the "player's" choice (-1: not yet)
     bool loading = false;
+    bool screenOpen = false;  // vending screen or Infusion choice: traps deferred
+    bool cutscene = false;    // Booker invulnerable: the DeathLink death is refused
 
     void Reply(const std::string& line) {
         if (apgive >= 0 && line.rfind("called ", 0) == 0) {
@@ -153,8 +156,12 @@ struct FakeGame {
         } else if (cmd == "trap") {
             std::string rest;
             std::getline(in >> std::ws, rest);
-            traps.push_back(rest);
-            g_sink("ok trap " + rest);
+            if (screenOpen) {
+                g_sink("err trap deferred: screen open");
+            } else {
+                traps.push_back(rest);
+                g_sink("ok trap " + rest);
+            }
         } else if (cmd == "gearap") {
             std::string id;
             in >> id;
@@ -253,6 +260,8 @@ struct FakeGame {
         } else if (cmd == "kill") {
             if (loading) {
                 g_sink("err no character to kill");
+            } else if (cutscene) {
+                g_sink("err cutscene in progress");
             } else {
                 ++kills;
                 g_sink("called XPlayerController.Suicide()");
@@ -388,6 +397,7 @@ int main(int argc, char** argv) {
     apclient::Address addr;
     Check(apclient::ParseAddress(argv[1], &addr), "address parsed");
 
+    apclient::SetTrapDelays({1000, 3000, 1000, 2000});  // the game waits 15 to 60 s
     apclient::SetNotifier([](const apclient::Notice& n) {
         std::printf("  notice %d: %s / %s / %s\n", static_cast<int>(n.kind), n.item.c_str(), n.player.c_str(),
                     n.text.c_str());
@@ -463,6 +473,85 @@ int main(int argc, char** argv) {
         Check(Pump(10000, [&] { return g_game.locks.size() < before; }), "a ware unlocked");
         Check(Pump(5000, [&] { return Sold(unlock); }), "row marked sold");
         Check(!Announced(apclient::Notice::Kind::ItemReceived, name, ""), "no notice for our own item");
+    }
+
+    std::printf("\n== Rows of the areas left behind ==\n");
+    {
+        std::map<std::string, Row> home;  // every row on its own machine (all machines loaded)
+        for (const auto& [id, r] : g_game.shop) home[id] = r;
+        const auto lower = [](std::string s) {
+            std::transform(s.begin(), s.end(), s.begin(),
+                           [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+            return s;
+        };
+        const auto inEmporia = [&](const std::string& m) { return lower(m).rfind("s_emp_", 0) == 0; };
+        const auto leftBehind = [&](const std::string& m) {  // Town Center, Battleship Bay, Finkton
+            const std::string l = lower(m);
+            return l.rfind("s_twn", 0) == 0 || l.rfind("s_bw_", 0) == 0 || l.rfind("s_fink_", 0) == 0;
+        };
+        const std::vector<std::string> allMachines = g_game.machines;
+        g_game.machines.clear();
+        for (const std::string& m : allMachines) {
+            if (inEmporia(m)) g_game.machines.push_back(m);
+        }
+        const std::size_t loaded = g_game.machines.size();
+        const auto caughtUp = [&] {
+            std::vector<std::string> ids;
+            for (const auto& [id, r] : g_game.shop) {
+                if (home.count(id) && leftBehind(home[id].machine)) ids.push_back(id);
+            }
+            return ids;
+        };
+        Check(Pump(10000, [&] { return !caughtUp().empty(); }), "rows not bought in earlier areas shown in Emporia");
+        Pump(3000);
+        const std::vector<std::string> shown = caughtUp();
+        std::printf("  %zu rows caught up on %zu machines\n", shown.size(), loaded);
+        Check(shown.size() <= 5 * loaded, "at most 5 caught-up rows per machine");
+        Check(std::all_of(g_game.shop.begin(), g_game.shop.end(),
+                          [&](const auto& kv) { return inEmporia(kv.second.machine); }),
+              "rows only on the loaded machines");
+        Check(std::none_of(g_game.shop.begin(), g_game.shop.end(),
+                           [&](const auto& kv) {
+                               return home.count(kv.first) && !inEmporia(home[kv.first].machine) &&
+                                      !leftBehind(home[kv.first].machine);
+                           }),
+              "no row of a later area");
+        Check(std::none_of(shown.begin(), shown.end(), [&](const std::string& id) { return g_game.shop[id].sold; }),
+              "caught-up rows are the ones not bought");
+        int highestShown = 0, cheapestHidden = 1 << 30;
+        for (const std::string& id : shown) highestShown = (std::max)(highestShown, g_game.shop[id].price);
+        for (const auto& [id, r] : home) {
+            if (leftBehind(r.machine) && !r.sold && !g_game.shop.count(id))
+                cheapestHidden = (std::min)(cheapestHidden, r.price);
+        }
+        Check(highestShown <= cheapestHidden, "cheapest rows first");
+        if (!shown.empty()) {
+            const std::string id = shown.front();
+            g_game.Buy(id);
+            Check(Pump(10000, [&] { return !g_game.shop.count(id); }), "a caught-up row bought leaves the list");
+            g_game.machines = allMachines;
+            Check(Pump(10000, [&] { return Sold(id) && g_game.shop[id].machine == home[id].machine; }),
+                  "and shows sold on its own machine");
+        }
+        g_game.machines = allMachines;
+        Pump(3000);
+
+        // price_percent= in BioShockAP.ini: the rows cost half.
+        std::ofstream(ExeDir() + "BioShockAP.ini", std::ios::app) << "price_percent=50\n";
+        apclient::Disconnect();
+        Check(Reconnect(addr), "reconnected with price_percent=50");
+        const std::string row = FindRow([&](const Row&) { return true; });  // a row not bought, on its machine
+        Check(Pump(10000,
+                   [&] {
+                       return !row.empty() && g_game.shop.count(row) &&
+                              g_game.shop[row].price == (std::max)(1, home[row].price * 50 / 100);
+                   }),
+              "prices at 50%");
+        std::ofstream(ExeDir() + "BioShockAP.ini", std::ios::app) << "price_percent=100\n";
+        apclient::Disconnect();
+        Check(Reconnect(addr), "reconnected with price_percent=100");
+        Check(Pump(10000, [&] { return g_game.shop.count(row) && g_game.shop[row].price == home[row].price; }),
+              "prices back to the seed's");
     }
 
     std::printf("\n== Money during a load (no confirmation) ==\n");
@@ -694,8 +783,19 @@ int main(int argc, char** argv) {
                                  [](const std::string& t) { return t.rfind("disarm", 0) == 0; });
         };
         const auto before = disarms();
+        // Received in a menu or a load (an auto-connection replays the traps received offline):
+        // fired only once Booker is in game.
+        g_game.loading = true;
+        Pump(3000);  // the client sees the load (position read every 2 s)
         std::ofstream(argv[5], std::ios::app) << "/send Booker Disarm Trap\n";
-        Check(Pump(15000, [&] { return disarms() > before; }), "trap received: triggered in the game");
+        Pump(8000);
+        Check(disarms() == before, "trap received during a load: waits");
+        g_game.loading = false;
+        g_game.screenOpen = true;  // an Infusion to choose: the trap waits for the screen
+        Pump(8000);
+        Check(disarms() == before, "trap during the Infusion choice: waits");
+        g_game.screenOpen = false;
+        Check(Pump(25000, [&] { return disarms() > before; }), "trap triggered once in game");
         Pump(5000);
         Check(disarms() == before + 1, "trap triggered once");
     }
@@ -760,6 +860,17 @@ int main(int argc, char** argv) {
     Check(g_game.kills == 1, "no death applied during the load");
     g_game.loading = false;
     Check(Pump(10000, [&] { return g_game.kills == 2; }), "death received during the load applied afterwards");
+    // Another player's death during a cutscene: kept, applied once it ends.
+    Pump(11000);  // end of the grace period after the received death
+    g_game.cutscene = true;
+    g_sink("event death");
+    Check(Pump(10000, [&] { return deathsSeen() == 3; }), "Booker's death sent (before the cutscene)");
+    Pump(4000);
+    Check(g_game.kills == 2, "no death applied during a cutscene");
+    g_game.cutscene = false;
+    Check(Pump(10000, [&] { return g_game.kills == 3; }), "death received during a cutscene applied when it ends");
+    Pump(5000);
+    Check(deathsSeen() == 3, "the death applied after the cutscene is not sent back");
 
     std::printf("\n== Goal: Siphon destroyed ==\n");
     const std::string serverLog = argv[3];

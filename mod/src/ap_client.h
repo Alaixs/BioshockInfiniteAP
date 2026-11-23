@@ -5,10 +5,14 @@
 // every 2 s: where + poi, then a resync. Reconnects every 5 s.
 //
 // Next to the DLL:
-//   BioShockAP.ini         last login, auto-connect and debug flags
+//   BioShockAP.ini         last login, auto-connect and debug flags, price_percent= (shop prices
+//                          in percent of the seed's, 100 by default)
 //   BioShockAP_state.json  per seed: checks made in game (resent on each connection, so offline
 //                          purchases aren't lost) and items already announced
 // The count of items already given lives in the game's save.
+//
+// Shops: each loaded machine shows its own rows, then up to 5 rows not bought in the areas left
+// behind (slot_data "areas", cheapest first), since the story never goes back there.
 //
 // Tested without the game by tests/loop_test.cpp. Game thread only.
 
@@ -61,6 +65,12 @@ void SetAutoConnect(bool enabled);
 bool DebugEnabled();
 
 void Tick();
+
+// Delays of the received traps (ms): the first one in game, then between two. For the loop test.
+struct TrapDelays {
+    unsigned long firstMin, firstMax, gapMin, gapMax;
+};
+void SetTrapDelays(const TrapDelays& delays);
 
 // Shown by ap_notify.
 struct Notice {
