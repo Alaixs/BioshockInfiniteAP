@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdio>
+#include <cstring>
 #include <deque>
 #include <fstream>
 #include <functional>
@@ -714,14 +715,25 @@ int main(int argc, char** argv) {
         g_sink("event vigor " + locked);
         Check(Pump(5000, [&] { return ReadFile(serverLog).find(places.at(locked)) != std::string::npos; }),
               "Vigor found in the game: check sent");
-        const std::string vigor = FindRow([](const Row& r) { return Ours(r) && r.name.rfind("Vigor: ", 0) == 0; });
+        // "Vigor: Devil's Kiss" -> "devilskiss". The bought Vigor's own lock is checked, not the count:
+        // the location just checked may hold one of our Vigors too, unlocked meanwhile.
+        const auto keyOf = [](const std::string& name) {
+            std::string key;
+            for (const unsigned char c : name.substr(std::strlen("Vigor: "))) {
+                if (std::isalnum(c)) key += static_cast<char>(std::tolower(c));
+            }
+            return key;
+        };
+        const std::string vigor = FindRow([&](const Row& r) {
+            return Ours(r) && r.name.rfind("Vigor: ", 0) == 0 && g_game.vigorLocks.count(keyOf(r.name));
+        });
         if (vigor.empty()) {
-            std::printf("  (no Vigor of ours in the shop: step skipped)\n");
+            std::printf("  (no locked Vigor of ours in the shop: step skipped)\n");
         } else {
-            const std::size_t locks = g_game.vigorLocks.size();
+            const std::string key = keyOf(g_game.shop[vigor].name);
             const std::size_t given = g_game.onceGiven.size();
             g_game.Buy(vigor);
-            Check(Pump(10000, [&] { return g_game.vigorLocks.size() == locks - 1; }), "Vigor received: unlocked");
+            Check(Pump(10000, [&] { return !g_game.vigorLocks.count(key); }), "Vigor received: unlocked");
             // Given outside the queue: an Infusion waiting for the player's choice doesn't hold it back.
             Check(Pump(10000, [&] { return g_game.onceGiven.size() > given; }),
                   "Vigor received: given to the game (giveonce)");
