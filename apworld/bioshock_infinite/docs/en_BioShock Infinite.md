@@ -7,6 +7,13 @@ Dollar Bill vending machines become Archipelago shops. Each machine sells its ow
 traps are never sold in your own machines, nor your own Silver Eagles (except, rarely, when nothing
 else can take their place).
 
+Prices rise with the story (`price_scaling: by_area`): the first areas sell cheap, the last ones
+dear. By default shops never sell progression items (`progression_in_shops`), so an item you can't
+afford never blocks anyone. The story never goes back to an area, so the items you didn't buy in the
+areas left behind come back in the next machines, cheapest first (up to 5 per machine). To make
+every price cheaper in a seed already generated, add `price_percent=50` (for half price) to
+`BioShockAP.ini` next to the mod.
+
 The machines' own wares (health kits, salts and every ammo type) are locked until you receive the
 matching unlock item from the multiworld.
 
@@ -26,8 +33,8 @@ With `checkpoint_checks`, reaching a point of the story sends a check: the 37 ch
 Chapter menu by default (`chapters`), or every autosave checkpoint of the story (`all`, 99).
 
 With `randomize_vigors`, Devil's Kiss, Murder of Crows, Bucking Bronco, Charge, Undertow and Return
-to Sender are Archipelago items: the first time the game gives you one (bottle, enemy drop...), it
-is taken away and its location is checked; you get the Vigor (with the game's tutorial) when you
+to Sender are Archipelago items: the first time the game gives you one (bottle, enemy drop...), Booker
+doesn't drink it (no animation, no tutorial) and its location is checked; you get the Vigor (with the game's tutorial) when you
 receive its item. Possession and Shock Jockey are given by the story as usual: it needs them.
 
 With `lock_tears` (on by default), Elizabeth can't open Tears (cover, weapons, Sky-Hooks, allies...)
@@ -56,9 +63,8 @@ Dollar Bill machines.
 - Unlocks for each Dollar Bill ware: Health Kit, Small Health Kit, Salts, Small Salts and the ammo
   of each weapon.
 - Infusions: when you receive one, the game's own Infusion screen opens and you choose Health,
-  Shield or Salts. If it can't open right now (at the very start of Town Center the game hasn't
-  loaded the upgrades yet), a message at the bottom of the screen lets you choose with F9, F10 or
-  F11, and the upgrade is applied as soon as it can be.
+  Shield or Salts. Until Booker has his shield, or while another screen is open, it waits and opens
+  as soon as it can.
 - Elizabeth's Tears (`lock_tears`): Elizabeth can open Tears.
 - Lockpicking (`lock_lockpicking`): Elizabeth can pick the locks that cost lockpicks.
 - Monument Island Pass and Finkton Pass (`area_passes`): the way to these areas opens.
