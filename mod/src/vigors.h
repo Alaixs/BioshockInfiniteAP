@@ -22,8 +22,8 @@
 // (XPawn.DestroyInventoryItem) and reported as "event vigor <key>", the first time being its
 // check. If it is in hand the game switches to the next one first: destroying it in hand breaks
 // the left hand. A received Vigor is given like a free purchase (inventory giveonce): no drinking
-// animation, no tutorial, and only in a level whose packages hold its bottle item (Murder of Crows
-// isn't in Raffle Square: it comes in Comstock Center Rooftops).
+// animation, no tutorial. In a level that hasn't loaded it (Murder of Crows in Raffle Square),
+// inventory loads every item first.
 //
 // Game thread only.
 

@@ -310,6 +310,38 @@ const void* ResolveForInventory(int id) {
     }
 }
 
+// UObject::LoadPackage(nullptr, name, flags, 0) (game_build.h): the package, or nullptr.
+const void* LoadPackage(const wchar_t* name) {
+    using LoadPackage_t = const void*(__cdecl*)(void* outer, const wchar_t* name, std::uint32_t flags, void* unused);
+    __try {
+        return reinterpret_cast<LoadPackage_t>(Base() + build::kRvaLoadPackage)(nullptr, name, build::kLoadPackageFlags,
+                                                                                nullptr);
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return nullptr;
+    }
+}
+
+// An item the level hasn't loaded (a Vigor received in Town Center before its level, an Infusion at
+// its start): CoalescedItems.xxx holds every item, Vigor and weapon, and loading it (0.7 s, no
+// visible freeze) makes them all findable. What isn't given at once goes at the next garbage
+// collection: a Vigor in Booker's inventory stays. Only with Booker in the game (not between two
+// levels), and at most every 30 s: an item still missing just after a load is missing for good.
+constexpr DWORD kAllItemsReloadMs = 30000;
+
+void LoadAllItems(const void* controller) {
+    static DWORD last = 0;
+    const DWORD now = GetTickCount();
+    if (last && now - last < kAllItemsReloadMs) return;
+    ue3::Property p;
+    std::string err;
+    const void* owner = ue3::ResolvePath(controller, "Pawn", &p, &err);
+    if (!owner || !ue3::IsObject(ue3::ObjectField(owner, p))) return;
+    last = now | 1;
+    const void* package = LoadPackage(L"CoalescedItems");
+    Log("inventory: item missing in this level, CoalescedItems %s (%lu ms)", package ? "loaded" : "not loaded",
+        static_cast<unsigned long>(GetTickCount() - now));
+}
+
 void GiveItem(const void* controller, int id, const Reply& reply) {
     const std::uint8_t* entry = DbEntry(id);
     if (!entry) {
@@ -324,12 +356,13 @@ void GiveItem(const void* controller, int id, const Reply& reply) {
         reply("err item " + std::to_string(id) + " without class or name");
         return;
     }
+    // An object can be in memory before the game can find it (a later level's Vigor, the shield
+    // before the Luteces: HasShield guards that one): load every item, else wait, or the game crashes.
+    if (!FindLoaded(cls, outer, name) || !ResolveForInventory(id)) LoadAllItems(controller);
     if (!FindLoaded(cls, outer, name)) {
         reply("err item " + std::to_string(id) + " (" + outer + "." + name + ") not in memory");
         return;
     }
-    // An object can be in memory before the game can find it (a later level's Vigor, the shield
-    // before the Luteces): wait, or the game crashes.
     if (!ResolveForInventory(id)) {
         reply("err item " + std::to_string(id) + " (" + outer + "." + name + ") not usable yet");
         return;
@@ -451,6 +484,22 @@ bool Command(const std::string& cmd, const std::string& arg, const void* control
         const int id = std::atoi(arg.c_str());
         const void* obj = ResolveForInventory(id);
         reply("itemcheck " + std::to_string(id) + " = " + (obj ? ue3::PathName(obj) : std::string("not found")));
+        return true;
+    }
+    if (cmd == "loadpackage") {
+        // loadpackage <name> (debug): UObject::LoadPackage, as the game loads its item packages.
+        if (arg.empty()) {
+            reply("err usage: loadpackage <package name>");
+            return true;
+        }
+        const std::wstring name(arg.begin(), arg.end());
+        const DWORD start = GetTickCount();
+        const void* package = LoadPackage(name.c_str());
+        const unsigned long ms = GetTickCount() - start;
+        Log("inventory: loadpackage %s -> %s (%lu ms)", arg.c_str(),
+            package ? ue3::PathName(package).c_str() : "failed", ms);
+        reply("loadpackage " + arg + " = " + (package ? ue3::PathName(package) : std::string("failed")) + " (" +
+              std::to_string(ms) + " ms)");
         return true;
     }
     if (cmd != "giveitem") return false;

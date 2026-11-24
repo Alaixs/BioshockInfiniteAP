@@ -34,11 +34,10 @@ Chapter menu by default (`chapters`), or every autosave checkpoint of the story 
 
 With `randomize_vigors`, Murder of Crows, Bucking Bronco, Charge, Undertow and Return to Sender are
 Archipelago items: the first time the game gives you one (bottle, enemy drop...), Booker doesn't
-drink it (no animation, no tutorial) and its location is checked. You get the Vigor when you receive
-its item, straight into your Vigors (no animation, no tutorial). Like the upgrades, where the current
-level hasn't loaded that Vigor yet, it comes in the next level that has it. Possession, Shock Jockey
-and Devil's Kiss are given by the story as usual: it needs them (the way out of Raffle Square only
-opens once Booker has drunk Devil's Kiss).
+drink it (no animation, no tutorial) and its location is checked. You get the Vigor as soon as you
+receive its item, in any level, straight into your Vigors (no animation, no tutorial). Possession,
+Shock Jockey and Devil's Kiss are given by the story as usual: it needs them (the way out of Raffle
+Square only opens once Booker has drunk Devil's Kiss).
 
 With `lock_tears` (on by default), Elizabeth can't open Tears (cover, weapons, Sky-Hooks, allies...)
 until you receive the Elizabeth's Tears item: the use key on a Tear only shows a message. The
@@ -72,8 +71,7 @@ Dollar Bill machines.
 - Lockpicking (`lock_lockpicking`): Elizabeth can pick the locks that cost lockpicks.
 - Monument Island Pass and Finkton Pass (`area_passes`): the way to these areas opens.
 - Vigors (Murder of Crows, Bucking Bronco, Charge, Undertow, Return to Sender).
-- Vigor and weapon upgrades (62), applied as soon as you receive them. Where the current level hasn't
-  loaded an upgrade yet (Town Center, parts of Emporia), it is applied in the next level that has it.
+- Vigor and weapon upgrades (62), applied as soon as you receive them, in any level.
 - Gear pieces, one per Gear package in the game (no duplicates): received straight into your Gear
   inventory, in any level.
 - Bundles of Silver Eagles.

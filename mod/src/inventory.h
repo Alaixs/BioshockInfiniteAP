@@ -10,6 +10,7 @@
 //                  screen (again every 3 s while it can't: another screen open, pause menu...).
 //                  "err choice pending" until the player chooses, then "infusionpick done|wait
 //                  <token>" until the item is in memory and given.
+//   loadpackage <name>  (debug) UObject::LoadPackage: "loadpackage <name> = <package>|failed (<ms> ms)".
 //
 // The choice screen needs a container: the mod spawns an invisible Pickup_Base_StableTonic (in
 // every level) under Booker with the three Loot_StableTonic_*_Bonus_1 choices and opens it like a
@@ -17,9 +18,10 @@
 // the screen closes. Cancel brings the screen back 20 s later.
 //
 // ServerTransactLootItem(id, 1, Money, 0) gives an item like a free purchase but crashes if the
-// item isn't in memory. Infusion items are in nearly every level's packages except the start of
-// Town Center (S_TWN_P), and the game can't load them on demand, so we check first and reply an
-// error: the client retries.
+// item isn't in memory. Each level only loads its own items (no Infusion at the start of Town
+// Center, no Charge before its end): for one missing, the mod loads CoalescedItems.xxx, which holds
+// them all (UObject::LoadPackage: DynamicLoadObject can't load in seek free mode), then gives it.
+// If that still fails, it replies an error: the client retries.
 //
 // Game thread only.
 

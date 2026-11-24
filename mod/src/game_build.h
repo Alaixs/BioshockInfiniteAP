@@ -120,6 +120,14 @@ constexpr std::uintptr_t kRvaApplyGearCallSite = 0x587855u;     // return addres
 constexpr std::size_t kUpgradeWeaponList = 0xE4u;               // read by the upgrade loop: none = nothing to do
 constexpr std::size_t kGearApplySlot = 0xA0u / 4u;              // virtual, __thiscall(controller, 1, 4)
 
+// UObject::LoadPackage(UPackage* Outer, const TCHAR* Name, DWORD LoadFlags, 0), __cdecl: loads a
+// whole package from disk, even in seek free mode (StaticLoadObject, so DynamicLoadObject, refuses:
+// it tests GUseSeekFreeLoading, dword 0x13835E0, and gives up). Found from the "FailedLoadPackage"
+// string it reports; the game calls it at startup (0x80EF29) with flags 0x4082 for its SLCDiff
+// item package. CoalescedItems.xxx holds every item, Vigor and weapon of the game.
+constexpr std::uintptr_t kRvaLoadPackage = 0x10C880u;
+constexpr std::uint32_t kLoadPackageFlags = 0x4082u;
+
 // Sizes of the vending machines' UnrealScript structs (read from the reflection).
 constexpr std::size_t kSizeofVendingMachineItem = 0x0Cu;  // LootItem, ItemCost, ItemsAvailable
 constexpr std::size_t kSizeofAvailableItemInfo = 0x38u;   // ..., AvailableStacksRemaining @0x34
