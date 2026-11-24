@@ -20,13 +20,13 @@ namespace bsap::vigors {
 
 namespace {
 
-// Key -> start of the archetype name of the Vigor's XWeapon.
+// Key -> start of the archetype name of the Vigor's XWeapon. No Devil's Kiss: never locked (see the
+// header), even by a seed generated before 0.2.1 that still sends "vigorlock devilskiss".
 struct VigorKind {
     const char* key;
     const char* prefixes[2];
 };
 const VigorKind kVigors[] = {
-    {"devilskiss", {"plasmid_devilskiss", "plasmid_incinerate"}},
     {"murderofcrows", {"plasmid_murderofcrows", nullptr}},
     {"buckingbronco", {"plasmid_buckingbronco", "plasmid_rollingthunder"}},
     {"charge", {"plasmid_charge", nullptr}},

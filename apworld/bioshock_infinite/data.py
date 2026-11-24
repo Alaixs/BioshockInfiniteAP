@@ -81,11 +81,15 @@ VIGORS: list[tuple[str, str, str, str, int]] = [
     ("returntosender", "Return to Sender", "Emporia", "Downtown Emporia", 474),
 ]
 
+# Devil's Kiss is no longer randomized (0.2.1): the story only goes on once Booker has drunk it (its
+# drinking scene opens the way out of Raffle Square). It stays in VIGORS for its ids.
+STORY_VIGORS = {"devilskiss"}
+RANDOMIZED_VIGORS = [vigor for vigor in VIGORS if vigor[0] not in STORY_VIGORS]
+
 
 # Veni! Vidi! Vigor! row of each randomized Vigor, hidden until its item comes in: otherwise the
 # player would pay for a Vigor the mod takes away at once.
 VIGOR_VENDING_LOOT = {
-    "devilskiss": "Loot_Consumable_Plasmid_Incinerate_Founder_MaxAmmo",
     "murderofcrows": "Loot_Consumable_Plasmid_MurderOfCrows_Founder_MaxAmmo",
     "buckingbronco": "Loot_Consumable_Plasmid_RollingThunder_Founder_MaxAmmo",
     "charge": "Loot_Consumable_Plasmid_Charge_Founder_MaxAmmo",
@@ -201,11 +205,13 @@ location_name_to_id.update(
     }
 )
 
-# Vigors: BASE_ID + 3000 + index.
+# Vigors: BASE_ID + 3000 + index in VIGORS (Devil's Kiss keeps its id, unused).
+location_name_to_id.update(
+    {vigor_location_name(name, place): BASE_ID + 3000 + i for i, (_, name, _, place, _) in enumerate(VIGORS)}
+)
 VIGOR_LOCATIONS: list[tuple[str, str, str]] = [
-    (vigor_location_name(name, place), area, key) for key, name, area, place, _ in VIGORS
+    (vigor_location_name(name, place), area, key) for key, name, area, place, _ in RANDOMIZED_VIGORS
 ]
-location_name_to_id.update({name: BASE_ID + 3000 + i for i, (name, _, _) in enumerate(VIGOR_LOCATIONS)})
 
 # Gear packages: (location name, area, package id in the game), from BASE_ID + 4000 on, in the
 # order of the game's ids.
@@ -287,7 +293,7 @@ location_name_groups["Upgrade Machines"] = {
 location_name_groups["Dollar Bills"] = {name for name, _, _ in SHOP_LOCATIONS}
 item_name_groups: dict[str, set[str]] = {
     "Gear": {gear_item_name(name) for name, _, _ in GEAR_ITEMS},
-    "Vigors": {vigor_item_name(name) for _, name, _, _, _ in VIGORS},
+    "Vigors": {vigor_item_name(name) for _, name, _, _, _ in RANDOMIZED_VIGORS},
     "Upgrades": {upgrade_item_name(name) for name, _, _ in UPGRADES},
     "Traps": set(TRAPS),
     "Passes": {name for name, _, _ in PASSES},

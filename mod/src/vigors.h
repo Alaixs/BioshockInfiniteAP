@@ -9,15 +9,21 @@
 //   vigors                        -> "vigor <archetype>" for each of Booker's Vigors, then
 //                                 "end vigors N"
 //
-// Keys: devilskiss, murderofcrows, buckingbronco, charge, undertow, returntosender. Possession
-// and Shock Jockey are never locked: the story needs them (Welcome Center, Hall of Heroes).
-// Neither is the Bucking Bronco lent by a Fair booth (Plasmid_BuckingBronco_Twn_Fair).
+// Keys: murderofcrows, buckingbronco, charge, undertow, returntosender. Possession and Shock Jockey
+// are never locked: the story needs them (Welcome Center, Hall of Heroes). Neither is Devil's Kiss:
+// the story only goes on once Booker has drunk it. Equipping it starts the "Player Got Devils Kiss"
+// pattern (XPatternEvent_PawnWeaponEquipped, S_TWN_FairStreet_Game), whose drinking scene ends with
+// DKIntroComplete: the quest moves on and the way out of Raffle Square opens. Taken without drinking
+// (0.2.0), the quest stayed on "take the Vigor from the Fireman". Nor is the Bucking Bronco lent by a
+// Fair booth (Plasmid_BuckingBronco_Twn_Fair).
 //
 // A locked Vigor's bottle or drop is taken without drinking it (collect). One that still lands in the
 // inventory (a chapter's loadout script, a pickup that skips the search hook) is removed
 // (XPawn.DestroyInventoryItem) and reported as "event vigor <key>", the first time being its
 // check. If it is in hand the game switches to the next one first: destroying it in hand breaks
-// the left hand. A received Vigor is given like a bottle, with the game's tutorial.
+// the left hand. A received Vigor is given like a free purchase (inventory giveonce): no drinking
+// animation, no tutorial, and only in a level whose packages hold its bottle item (Murder of Crows
+// isn't in Raffle Square: it comes in Comstock Center Rooftops).
 //
 // Game thread only.
 

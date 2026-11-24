@@ -121,9 +121,9 @@ class BoysOfSilenceTrap(Toggle):
 
 
 class RandomizeVigors(DefaultOnToggle):
-    """Devil's Kiss, Murder of Crows, Bucking Bronco, Charge, Undertow and Return to Sender become
-    Archipelago items: finding one in the game sends a check, and you can only use it once you
-    receive its item. Possession and Shock Jockey stay where the story gives them (the story
+    """Murder of Crows, Bucking Bronco, Charge, Undertow and Return to Sender become Archipelago
+    items: finding one in the game sends a check, and you can only use it once you receive its
+    item. Possession, Shock Jockey and Devil's Kiss stay where the story gives them (the story
     needs them)."""
 
     display_name = "Randomize Vigors"

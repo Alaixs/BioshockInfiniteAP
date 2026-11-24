@@ -24,6 +24,7 @@ from .data import (
     LOCKPICKING,
     LOCKPICKING_FIRST_AREA,
     PASSES,
+    RANDOMIZED_VIGORS,
     SHOP_AREAS,
     SILVER_EAGLES,
     TEARS,
@@ -35,7 +36,6 @@ from .data import (
     VICTORY,
     VIGOR_LOCATIONS,
     VIGOR_VENDING_LOOT,
-    VIGORS,
     VOXOPHONE_LOCATIONS,
     gear_item_name,
     item_name_groups,
@@ -211,7 +211,7 @@ class BioShockInfiniteWorld(World):
         pool = [self.create_item(name) for name in UNLOCKS]
         pool += [self.create_item(INFUSION) for _ in self.infusions]
         if self.vigors:
-            pool += [self.create_item(vigor_item_name(name)) for _, name, _, _, _ in VIGORS]
+            pool += [self.create_item(vigor_item_name(name)) for _, name, _, _, _ in RANDOMIZED_VIGORS]
         # No duplicates: there are more pieces than packages.
         pieces = self.random.sample([gear_item_name(name) for name, _, _ in GEAR_ITEMS], len(self.gear))
         pool += [self.create_item(name) for name in pieces]
@@ -379,7 +379,7 @@ class BioShockInfiniteWorld(World):
                     "lookup": lookup,
                     "loot": VIGOR_VENDING_LOOT[key],
                 }
-                for (key, name, _, _, lookup), (location, _, _) in zip(VIGORS, VIGOR_LOCATIONS)
+                for (key, name, _, _, lookup), (location, _, _) in zip(RANDOMIZED_VIGORS, VIGOR_LOCATIONS)
             }
             if self.vigors
             else {},

@@ -700,12 +700,11 @@ int main(int argc, char** argv) {
     std::printf("\n== Vigors ==\n");
     {
         const std::string serverLog = argv[3];
-        Check(!g_game.vigorLocks.empty() && g_game.vigorLocks.size() <= 6,
+        Check(!g_game.vigorLocks.empty() && g_game.vigorLocks.size() <= 5,
               "randomized Vigors not received yet are locked");
-        Check(g_game.vigorLocks.size() + g_game.vigorsOwned.size() == 6,
+        Check(g_game.vigorLocks.size() + g_game.vigorsOwned.size() == 5,
               "every randomized Vigor is either locked or owned");
         const std::map<std::string, std::string> places = {
-            {"devilskiss", "Vigor - Devil's Kiss (Raffle Square)"},
             {"murderofcrows", "Vigor - Murder of Crows (Comstock Center Rooftops)"},
             {"buckingbronco", "Vigor - Bucking Bronco (Hall of Heroes)"},
             {"charge", "Vigor - Charge (Finkton Proper)"},
@@ -715,7 +714,7 @@ int main(int argc, char** argv) {
         g_sink("event vigor " + locked);
         Check(Pump(5000, [&] { return ReadFile(serverLog).find(places.at(locked)) != std::string::npos; }),
               "Vigor found in the game: check sent");
-        // "Vigor: Devil's Kiss" -> "devilskiss". The bought Vigor's own lock is checked, not the count:
+        // "Vigor: Murder of Crows" -> "murderofcrows". The bought Vigor's own lock is checked, not the count:
         // the location just checked may hold one of our Vigors too, unlocked meanwhile.
         const auto keyOf = [](const std::string& name) {
             std::string key;
