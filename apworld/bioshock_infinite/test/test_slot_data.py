@@ -1,6 +1,6 @@
 """slot_data is all the client in the DLL knows about the seed."""
 
-from ..data import LOCKPICKING, TEARS, item_name_to_id
+from ..data import LOCKPICKING, RANDOMIZED_VIGORS, TEARS, item_name_to_id
 from . import BioShockInfiniteTestBase
 
 
@@ -23,7 +23,9 @@ class TestSlotData(BioShockInfiniteTestBase):
         self.assertEqual(data["tears_item"], item_name_to_id[TEARS])
         self.assertEqual(data["lockpick_item"], item_name_to_id[LOCKPICKING])
         self.assertEqual(sorted(data["passes"].values()), ["finkton", "monumentisland"])
-        self.assertEqual(len(data["vigors"]), 6)
+        # Devil's Kiss stays with the story: its drinking scene opens the way out of Raffle Square.
+        self.assertEqual(sorted(data["vigors"]), sorted(key for key, *_ in RANDOMIZED_VIGORS))
+        self.assertNotIn("devilskiss", data["vigors"])
         self.assertEqual(sorted(set().union(*data["areas"].values())), sorted(ours))
 
 
