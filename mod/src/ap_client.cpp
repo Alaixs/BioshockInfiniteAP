@@ -570,7 +570,7 @@ double UnixTime() {
 
 void OnDeath() {
     if (!g_deathLink) return;
-    if (g_killedAt && GetTickCount() - g_killedAt < kDeathGraceMs) return;
+    if (g_killedAt && NowMs() - g_killedAt < kDeathGraceMs) return;
     const std::string cause = g_address.name + " died in Columbia.";
     Send(json::array({{{"cmd", "Bounce"},
                        {"tags", json::array({"DeathLink"})},
@@ -581,9 +581,9 @@ void OnDeath() {
 // Not during a load or a cutscene (Booker is invulnerable then). Announced when it happens.
 void ApplyPendingDeath() {
     if (!g_pendingDeath || g_killInFlight || !g_inLevel) return;
-    if (g_killRefused && GetTickCount() - g_killRefusedAt < kKillRetryMs) return;
+    if (g_killRefused && NowMs() - g_killRefusedAt < kKillRetryMs) return;
     g_killInFlight = true;
-    g_killedAt = GetTickCount();
+    g_killedAt = NowMs();
     bridge::Inject("kill");
 }
 
@@ -603,7 +603,7 @@ void SaveTraps() {
 }
 
 void ApplyPendingTraps() {
-    const DWORD now = GetTickCount();
+    const DWORD now = NowMs();
     if (g_gameOver && !g_pendingTraps.empty()) {
         g_pendingTraps.clear();
         SaveTraps();
@@ -625,7 +625,7 @@ void ApplyPendingTraps() {
 // Reply of the mod to "trap": fired (next one later), or deferred by an open screen.
 void OnTrapReply(bool fired) {
     g_trapInFlight = false;
-    const DWORD now = GetTickCount();
+    const DWORD now = NowMs();
     if (!fired) {
         g_nextTrapAt = (now + RandomMs(kTrapRetryMinMs, kTrapRetryMaxMs)) | 1;
         return;
@@ -751,7 +751,7 @@ void OnModLine(const std::string& line) {
     } else if (g_killInFlight && parts[0] == "called" && line.find(".Suicide(") != std::string::npos) {
         g_killInFlight = false;
         g_killRefused = false;
-        g_killedAt = GetTickCount();
+        g_killedAt = NowMs();
         if (g_pendingDeath) {
             Log("[ap] DeathLink: %s", g_pendingDeath->c_str());
             Notify(Notice::Kind::DeathLink, {}, g_pendingDeathSource, *g_pendingDeath);
@@ -762,7 +762,7 @@ void OnModLine(const std::string& line) {
         g_killedAt = 0;          // nobody died: a real death of Booker is still sent
         if (!g_killRefused) Log("[ap] DeathLink: cutscene in progress, death applied when it ends");
         g_killRefused = true;
-        g_killRefusedAt = GetTickCount();
+        g_killRefusedAt = NowMs();
     } else if (g_killInFlight && line.rfind("err no character", 0) == 0) {
         g_killInFlight = false;  // loading: try again once back in game
         g_inLevel = false;
@@ -1021,7 +1021,7 @@ void OnNetEvent(const apnet::Event& e) {
             } else if (g_state == State::Connected || g_state == State::Reconnecting) {
                 if (g_state == State::Connected) Notify(Notice::Kind::ConnectionLost);
                 g_state = State::Reconnecting;
-                g_reconnectAt = GetTickCount() + kReconnectMs;
+                g_reconnectAt = NowMs() + kReconnectMs;
             }
             break;
     }
@@ -1181,7 +1181,7 @@ void Tick() {
     }
     for (apnet::Event e; apnet::Poll(&e);) OnNetEvent(e);
 
-    const DWORD now = GetTickCount();
+    const DWORD now = NowMs();
     if (g_state == State::Reconnecting && static_cast<int>(now - g_reconnectAt) >= 0) {
         g_reconnectAt = now + kReconnectMs * 3;  // a Close will push the next attempt back
         Log("[ap] connection attempt");

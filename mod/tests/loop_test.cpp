@@ -18,6 +18,8 @@
 
 #include <windows.h>
 
+#include <timeapi.h>
+
 #include <algorithm>
 #include <cctype>
 #include <cstdio>
@@ -319,16 +321,52 @@ void Check(bool ok, const char* what) {
     if (!ok) ++g_failures;
 }
 
-bool Pump(
-    DWORD timeoutMs, const std::function<bool()>& done = [] { return false; }) {
-    const DWORD end = GetTickCount() + timeoutMs;
-    while (static_cast<int>(GetTickCount() - end) < 0) {
+// The client's timers (2 s cycle, 5 s reconnection, 10 s DeathLink grace...) run on this virtual
+// clock (apclient::NowMs), 50 ms per frame of about 1 real ms: the test doesn't wait for them in
+// real time. It stands still while a connection opens, or the client would open another one.
+// The server and the Finder player stay in real time.
+unsigned long g_virtualNow = 1;
+constexpr unsigned long kVirtualFrameMs = 50;
+// A wait for nothing to happen also lasts this long in real time, so the server and the Finder
+// player have answered whatever they had to answer.
+constexpr DWORD kQuietMs = 500;
+
+namespace bsap::apclient {
+unsigned long NowMs() {
+    return g_virtualNow;
+}
+}  // namespace bsap::apclient
+
+// Runs the client and the fake game for timeoutMs of virtual time.
+//   Pump(t, done): until done(), true; false once t ms have passed in real time too (a failure
+//                  takes as long as before, a success no longer than needed).
+//   Pump(t): t ms of virtual time and at least min(t, kQuietMs) of real time, for the checks that
+//                  something did NOT happen.
+//   PumpDoing(t, eachFrame): the same, eachFrame playing the player (an Infusion choice...).
+bool Run(DWORD timeoutMs, const std::function<bool()>& done, const std::function<void()>& eachFrame) {
+    const DWORD realStart = GetTickCount();
+    const unsigned long virtualEnd = g_virtualNow + timeoutMs;
+    for (;;) {
         apclient::Tick();
         g_game.Frame();
-        if (g_queue.empty() && done()) return true;  // not in the middle of a batch of commands
-        Sleep(16);
+        if (eachFrame) eachFrame();
+        if (done && g_queue.empty() && done()) return true;  // not in the middle of a batch of commands
+        const DWORD real = GetTickCount() - realStart;
+        if (done ? real >= timeoutMs
+                 : static_cast<long>(g_virtualNow - virtualEnd) >= 0 && real >= (std::min)(timeoutMs, kQuietMs)) {
+            return false;
+        }
+        if (apclient::GetState() != apclient::State::Connecting) g_virtualNow += kVirtualFrameMs;
+        Sleep(1);
     }
-    return false;
+}
+
+bool Pump(DWORD timeoutMs, const std::function<bool()>& done = nullptr) {
+    return Run(timeoutMs, done, nullptr);
+}
+
+void PumpDoing(DWORD timeoutMs, const std::function<void()>& eachFrame) {
+    Run(timeoutMs, nullptr, eachFrame);
 }
 
 std::string ExeDir() {
@@ -377,6 +415,7 @@ int main(int argc, char** argv) {
         return 2;
     }
     LogFile() = stdout;
+    timeBeginPeriod(1);  // Sleep(1) of 1 ms, not 15: the virtual clock goes 50 times faster
     DeleteFileA((ExeDir() + "BioShockAP.ini").c_str());
     DeleteFileA((ExeDir() + "BioShockAP_state.json").c_str());
 
@@ -686,10 +725,7 @@ int main(int argc, char** argv) {
                        }),
                   "shield chosen: given to the game");
             Check(g_game.upgrades[before] == 329, "the right item (329, shield)");
-            Pump(8000, [&] {
-                choose();
-                return false;
-            });
+            PumpDoing(8000, [&] { choose(); });
             Pump(3000);  // a choice made just before is still given
             const std::size_t after = g_game.upgrades.size();
             Pump(5000);
@@ -835,10 +871,7 @@ int main(int argc, char** argv) {
                        }),
                   "Gear piece received: given to the game");
             Check(g_game.gear.size() > before && (g_game.gear[before] >> 48) == 1, "the game's Gear number (64 bits)");
-            Pump(5000, [&] {
-                choose();
-                return false;
-            });
+            PumpDoing(5000, [&] { choose(); });
             const std::size_t after = g_game.gear.size();
             Pump(5000);
             Check(g_game.gear.size() == after, "each piece given once");
@@ -906,9 +939,8 @@ int main(int argc, char** argv) {
     Check(Announced(apclient::Notice::Kind::Goal, "", ""), "notice: goal complete");
     // The server now sends all our remaining items (collect): nothing is given or announced
     // anymore.
-    Pump(8000, [] {
+    PumpDoing(8000, [] {
         if (!g_game.pickToken.empty()) g_game.pickChoice = 0;
-        return false;
     });
     Check(std::make_tuple(g_game.money, g_game.upgrades.size(), g_game.gear.size()) == givenBefore,
           "seed over: remaining items not given to the game");

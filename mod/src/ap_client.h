@@ -66,6 +66,10 @@ bool DebugEnabled();
 
 void Tick();
 
+// Clock of every timer of the client, in ms: GetTickCount (ap_clock.cpp, in the DLL only). The loop
+// test defines its own, a virtual clock it runs much faster than real time.
+unsigned long NowMs();
+
 // Delays of the received traps (ms): the first one in game, then between two. For the loop test.
 struct TrapDelays {
     unsigned long firstMin, firstMax, gapMin, gapMax;

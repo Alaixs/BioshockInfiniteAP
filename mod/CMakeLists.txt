@@ -52,6 +52,7 @@ add_library(BioShockAP SHARED
     src/ap_texture.cpp
     src/ap_net.cpp
     src/ap_client.cpp
+    src/ap_clock.cpp
     src/ap_menu.cpp
     src/ap_notify.cpp
 )
@@ -78,6 +79,6 @@ target_compile_options(BioShockAP PRIVATE /W4 /WX /utf-8)
 add_executable(loop_test EXCLUDE_FROM_ALL tests/loop_test.cpp src/ap_client.cpp src/ap_net.cpp)
 set_target_properties(loop_test PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/tests")
 target_include_directories(loop_test PRIVATE extern)
-target_link_libraries(loop_test PRIVATE winhttp normaliz)
+target_link_libraries(loop_test PRIVATE winhttp normaliz winmm)
 target_compile_definitions(loop_test PRIVATE BSAP_VERSION="${BSAP_VERSION}")
 target_compile_options(loop_test PRIVATE /W4 /WX /utf-8)

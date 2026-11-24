@@ -93,7 +93,10 @@ and the game behavior it relies on. Read it before changing the module.
 
 - **Loop test**: `.\build.ps1 -Test` generates a seed with `mod/tests/players/`, starts an
   Archipelago server and runs the real client against a fake game. It must pass; add checks when
-  you change the client's behavior.
+  you change the client's behavior. The client's timers run on a virtual clock (`apclient::NowMs`)
+  the test drives about 50 times faster than real time: wait with `Pump(ms, done)` for something
+  to happen, `Pump(ms)` or `PumpDoing(ms, eachFrame)` for something that must not, never with a
+  real sleep. Each run also generates the next run's seed in the background: about 30 s locally.
 - **Apworld tests**: `python apworld/run_tests.py <Archipelago source checkout>` runs
   `apworld/bioshock_infinite/test` with Archipelago's test runner; add `--general` for Archipelago's
   own tests of every world. The checkout needs its requirements and pytest:
