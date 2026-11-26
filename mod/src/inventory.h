@@ -40,4 +40,8 @@ void Tick(const void* controller);
 // An Infusion waits for the player's choice (its screen is open, or comes back soon).
 bool ChoicePending();
 
+// Item id (ItemLookupID) of one of the three Infusions of the choice screen, which shows their
+// item database name.
+bool IsInfusionItem(int id);
+
 }  // namespace bsap::inventory

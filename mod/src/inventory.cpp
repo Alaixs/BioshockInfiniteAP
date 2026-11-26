@@ -14,6 +14,7 @@
 #include <intrin.h>
 #include <windows.h>
 
+#include <algorithm>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -374,6 +375,10 @@ void GiveItem(const void* controller, int id, const Reply& reply) {
 
 bool ChoicePending() {
     return !g_pickToken.empty() && g_pickChoice < 0;
+}
+
+bool IsInfusionItem(int id) {
+    return std::find(std::begin(kInfusionChoices), std::end(kInfusionChoices), id) != std::end(kInfusionChoices);
 }
 
 void Tick(const void* controller) {

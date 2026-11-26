@@ -5,6 +5,7 @@
 #include "engine_call.h"
 #include "game_alloc.h"
 #include "game_build.h"
+#include "inventory.h"
 #include "log.h"
 #include "ue3.h"
 #include "ui_fix.h"
@@ -236,7 +237,9 @@ const void* At(const void* obj, const char* prop) {
 }
 
 // Carriers are gear items (XTonicItem): no "full" gauge like money or salts, so the row is always
-// buyable. The longest names leave the most room for the AP item's name.
+// buyable. The longest names leave the most room for the AP item's name. A carrier keeps the AP
+// name for the session, so the Infusions (XTonicItem too) are left out: their choice screen shows
+// their item database name.
 std::vector<int> CarrierPool() {
     static std::vector<int> pool;
     if (pool.empty()) {
@@ -244,7 +247,8 @@ std::vector<int> CarrierPool() {
         const int n = DbCount();
         for (int i = 0; i < n; ++i) {
             std::uint8_t* e = DbEntry(i);
-            if (ue3::ObjectName(Get<const void*>(e, kCompositeItemClass)) == "XTonicItem") {
+            if (ue3::ObjectName(Get<const void*>(e, kCompositeItemClass)) == "XTonicItem" &&
+                !inventory::IsInfusionItem(i)) {
                 found.push_back({Get<std::int32_t>(e, kCompositeItemName + 8), i});
             }
         }
