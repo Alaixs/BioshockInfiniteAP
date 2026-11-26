@@ -18,6 +18,8 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <set>
+#include <string>
 #include <vector>
 
 namespace bsap::inventory {
@@ -96,6 +98,13 @@ bool AcceptChoice(const void* controller, int index) {
 
 const void* g_choiceContainer = nullptr;
 DWORD g_nextScreenAt = 0;
+DWORD g_lastGrantAt = 0;  // last item given by the mod (GetTickCount)
+constexpr DWORD kPlayingBeforeGrantMs = 2000;
+constexpr DWORD kPlayingBeforeChoiceMs = 5000;
+// A Vigor's tutorial opens a moment after the Vigor is given, and the game queues those of
+// several Vigors: the choice screen waits for no screen at all during kCalmBeforeChoiceMs.
+constexpr DWORD kAfterGrantMs = 5000;
+constexpr DWORD kCalmBeforeChoiceMs = 2000;
 
 std::uintptr_t Base() {
     return reinterpret_cast<std::uintptr_t>(GetModuleHandleA(nullptr));
@@ -368,7 +377,24 @@ void GiveItem(const void* controller, int id, const Reply& reply) {
         reply("err item " + std::to_string(id) + " (" + outer + "." + name + ") not usable yet");
         return;
     }
-    engine::Call(controller, "ServerTransactLootItem", {std::to_string(id), "1", "1", "0"}, reply);
+    engine::Call(controller, "ServerTransactLootItem", {std::to_string(id), "1", "1", "0"},
+                 [&](const std::string& line) {
+                     if (line.rfind("called ", 0) == 0) g_lastGrantAt = GetTickCount();
+                     reply(line);
+                 });
+}
+
+// How long Booker has been in game (ms), 0 under the loading screen or without him. Items given
+// during a load play their tutorial under the loading screen, and the choice screen blocks it.
+DWORD PlayingFor(const void* controller) {
+    static DWORD since = 0;
+    world::Position pos{};
+    if (!world::PlayerPosition(controller, &pos) || CallBool(controller, "IsLoadingMovieShowing")) {
+        since = 0;
+        return 0;
+    }
+    if (!since) since = GetTickCount() | 1;
+    return GetTickCount() - since;
 }
 
 }  // namespace
@@ -381,6 +407,47 @@ bool IsInfusionItem(int id) {
     return std::find(std::begin(kInfusionChoices), std::end(kInfusionChoices), id) != std::end(kInfusionChoices);
 }
 
+namespace {
+
+// A screen (Scaleform movie) is open besides those always open in game: tutorial
+// (XTrainingMovieScreen, XModalTrainingTextScreen), pause, weapon wheel, vending machine...
+// Goes through every object: only called once a second while an Infusion waits.
+bool OtherScreenOpen() {
+    static const std::set<std::string> alwaysOpen = {"GFxMouseMovie", "XCertUtilityScreen", "XSinglePlayerGFxHUD"};
+    bool open = false;
+    ue3::ForEachObject([&](int, const void* obj) {
+        if (open) return;
+        const std::string cls = ue3::ClassName(obj);
+        if (cls.find("Screen") == std::string::npos && cls.find("Menu") == std::string::npos &&
+            cls.find("Movie") == std::string::npos && cls.find("HUD") == std::string::npos) {
+            return;
+        }
+        if (alwaysOpen.count(cls) || ue3::ObjectName(obj).rfind("Default__", 0) == 0) return;
+        ue3::Property p;
+        std::uint32_t bits = 0;
+        open = ue3::FindProperty(obj, "bMovieIsOpen", &p) &&
+               ue3::ReadBytes(static_cast<const std::uint8_t*>(obj) + p.offset, &bits, sizeof(bits)) &&
+               (bits & p.boolMask);
+    });
+    return open;
+}
+
+// Nothing else on screen for kCalmBeforeChoiceMs (checked once a second).
+bool ScreenCalm() {
+    static DWORD lastCheck = 0, calmSince = 0;
+    if (GetTickCount() - lastCheck >= 1000) {
+        lastCheck = GetTickCount();
+        if (OtherScreenOpen()) {
+            calmSince = 0;
+        } else if (!calmSince) {
+            calmSince = GetTickCount() | 1;
+        }
+    }
+    return calmSince && GetTickCount() - calmSince >= kCalmBeforeChoiceMs;
+}
+
+}  // namespace
+
 void Tick(const void* controller) {
     EnsureAcceptHook();
     EnsureMissingItemGuard();
@@ -388,17 +455,12 @@ void Tick(const void* controller) {
         DestroyChoiceContainer();
         g_nextScreenAt = GetTickCount() + 20000;  // cancelled: ask again later
     }
+    const DWORD playing = PlayingFor(controller);
     if (g_pickToken.empty() || g_pickChoice >= 0) return;
-    // Not during a load: under the loading screen the choice blocks it until a key is pressed.
-    // Booker must have been in game a few seconds.
-    static DWORD playingSince = 0;
-    world::Position pos{};
-    if (!world::PlayerPosition(controller, &pos) || CallBool(controller, "IsLoadingMovieShowing")) {
-        playingSince = 0;
-        return;
-    }
-    if (!playingSince) playingSince = GetTickCount() | 1;
-    if (GetTickCount() - playingSince < 5000) return;
+    // One thing at a time: Booker in game a few seconds, no item given just before, no other screen
+    // (the tutorials of the Vigors given).
+    if (playing < kPlayingBeforeChoiceMs || GetTickCount() - g_lastGrantAt < kAfterGrantMs) return;
+    if (!g_choiceContainer && !ScreenCalm()) return;
     // Another screen open, pause menu...: try again in 3 s.
     if (!g_choiceContainer && static_cast<int>(GetTickCount() - g_nextScreenAt) >= 0) {
         g_nextScreenAt = GetTickCount() + 3000;
@@ -407,12 +469,14 @@ void Tick(const void* controller) {
 }
 
 bool Command(const std::string& cmd, const std::string& arg, const void* controller, const Reply& reply) {
-    if ((cmd == "infusionpick" || cmd == "giveonce") && shop::GrantsBlocked()) {
+    const bool grant = cmd == "infusionpick" || cmd == "giveonce" || cmd == "giveitem";
+    const bool loading = grant && PlayingFor(controller) < kPlayingBeforeGrantMs;
+    if ((cmd == "infusionpick" || cmd == "giveonce") && (shop::GrantsBlocked() || loading)) {
         reply(cmd + " wait " + arg);
         return true;
     }
-    if (cmd == "giveitem" && shop::GrantsBlocked()) {
-        reply("err grant deferred: vending screen open");
+    if (cmd == "giveitem" && (shop::GrantsBlocked() || loading)) {
+        reply(std::string("err grant deferred: ") + (loading ? "loading" : "vending screen open"));
         return true;
     }
     if (cmd == "infusionpick") {
@@ -448,8 +512,10 @@ bool Command(const std::string& cmd, const std::string& arg, const void* control
             reply("err Infusion choice pending");
         } else {
             bool given = false;
+            const DWORD lastGrant = g_lastGrantAt;  // an Infusion has no tutorial to wait for
             GiveItem(controller, kInfusionChoices[g_pickChoice],
                      [&](const std::string& line) { given = line.rfind("called ", 0) == 0; });
+            g_lastGrantAt = lastGrant;
             if (given) {
                 savedata::Set(controller, variable, 1);
                 Log("inventory: Infusion given (%s)", arg.c_str());

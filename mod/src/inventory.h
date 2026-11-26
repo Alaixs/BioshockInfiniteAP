@@ -23,6 +23,12 @@
 // them all (UObject::LoadPackage: DynamicLoadObject can't load in seek free mode), then gives it.
 // If that still fails, it replies an error: the client retries.
 //
+// One thing at a time: nothing is given under the loading screen (a Vigor's tutorial would play
+// there) nor until Booker has been in game 2 s. The Infusion choice screen waits 5 s after the last
+// item given (Infusions aside), then for no other screen during 2 s: the game queues the tutorials
+// of the Vigors given (XTrainingMovieScreen, then XModalTrainingTextScreen), and the pause menu,
+// weapon wheel...
+//
 // Game thread only.
 
 #include <functional>
