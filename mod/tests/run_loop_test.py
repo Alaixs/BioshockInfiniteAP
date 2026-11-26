@@ -205,7 +205,8 @@ def serve_and_test(work: str, multidata: str) -> int:
     server_log_path = os.path.join(work, "server.txt")
     with open(server_log_path, "w", encoding="utf-8", errors="replace") as server_log:
         server = subprocess.Popen(
-            archipelago_command("Server") + ["--port", str(PORT), multidata],
+            # --host: without it the server looks up the public IP online before listening.
+            archipelago_command("Server") + ["--host", "localhost", "--port", str(PORT), multidata],
             cwd=ARCHIPELAGO,
             stdin=subprocess.PIPE,
             stdout=server_log,
