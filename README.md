@@ -48,6 +48,9 @@ The game remembers your login and connects by itself at the next start (untick A
 login screen to turn that off). If the connection drops, the mod reconnects on its own, and what
 you buy or pick up meanwhile is sent once it is back.
 
+ARCHIPELAGO replaces the game's 2K ACCOUNT button: the mod never talks to 2K. A linked 2K account
+stays linked; to link or unlink one, remove the DLL while you do it.
+
 There is no chat in the game: for chat and commands such as `!hint`, connect Archipelago's Text
 Client to the same slot. The [setup guide](apworld/bioshock_infinite/docs/setup_en.md) has the
 details.
@@ -57,6 +60,8 @@ details.
 - **No ARCHIPELAGO button on the main menu.** Open `BioShockAP.log`, next to the DLL. "unknown
   build" means the game is not the current Steam version; no log at all means the DLL is not in
   `Binaries\Win32`.
+- **The login screen closes as soon as it opens.** A 2K account is linked and the mod is 0.2.1 or
+  older: update it.
 - **Cannot connect.** Check the slot name, the address and the port of the room, and that the
   room is still open. The login screen shows the server's answer.
 - **Antivirus warning.** The DLL hooks into the game, which some antivirus programs dislike. Every

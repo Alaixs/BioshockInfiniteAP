@@ -39,6 +39,7 @@ using Localize_t = FString*(__cdecl*)(FString* out, const wchar_t* section, cons
                                       const wchar_t* lang, int optional);
 using NoArg_t = void(__fastcall*)(void* self, void* edx);
 using FollowLink_t = void(__fastcall*)(void* self, void* edx, int link, int a, int b);
+using GoBack_t = void(__fastcall*)(void* self, void* edx, int sound);
 using FindWidget_t = void*(__fastcall*)(void* self, void* edx, const void* name);
 using CloseModal_t = void(__fastcall*)(void* self, void* edx, int* modalId);
 using SelectedIndex_t = int(__fastcall*)(void* list, void* edx);
@@ -66,6 +67,8 @@ const void* Name(std::uintptr_t rva) {
 Localize_t g_localize = nullptr;
 NoArg_t g_mainMenuOnY = nullptr;
 NoArg_t g_accountAccept = nullptr;
+NoArg_t g_accountActivate = nullptr;
+GoBack_t g_goBack = nullptr;
 WaitCallback_t g_waitCallback = nullptr;
 
 void* GMalloc() {
@@ -429,6 +432,24 @@ bool Hook(std::uintptr_t rva, void* detour, void** original) {
     return MH_CreateHook(target, detour, original) == MH_OK && MH_EnableHook(target) == MH_OK;
 }
 
+// The account screen's activation sends it back when a 2K account is linked: it is a 2K login
+// screen. Ours has nothing to do with 2K, so that GoBack is skipped; the rest of the activation runs.
+void* g_activating = nullptr;
+
+void __fastcall AccountActivateDetour(void* self, void* edx) {
+    g_activating = self;
+    g_accountActivate(self, edx);
+    g_activating = nullptr;
+}
+
+void __fastcall GoBackDetour(void* self, void* edx, int sound) {
+    if (self && self == g_activating) {
+        Log("apmenu: 2K account linked, the login screen stays open");
+        return;
+    }
+    g_goBack(self, edx, sound);
+}
+
 bool InstallHooks() {
     const bool ok =
         Hook(kRvaLocalize, reinterpret_cast<void*>(&LocalizeDetour), reinterpret_cast<void**>(&g_localize)) &&
@@ -436,7 +457,10 @@ bool InstallHooks() {
         Hook(kRvaAccountAcceptOrSelect, reinterpret_cast<void*>(&AccountAcceptDetour),
              reinterpret_cast<void**>(&g_accountAccept)) &&
         Hook(kRvaAccountWaitCallback, reinterpret_cast<void*>(&WaitCallbackDetour),
-             reinterpret_cast<void**>(&g_waitCallback));
+             reinterpret_cast<void**>(&g_waitCallback)) &&
+        Hook(kRvaAccountActivate, reinterpret_cast<void*>(&AccountActivateDetour),
+             reinterpret_cast<void**>(&g_accountActivate)) &&
+        Hook(kRvaMenuGoBack, reinterpret_cast<void*>(&GoBackDetour), reinterpret_cast<void**>(&g_goBack));
     Log(ok ? "apmenu: Archipelago login screen in place" : "apmenu: ERROR, cannot hook the menus");
     return ok;
 }

@@ -194,6 +194,12 @@ constexpr int kAccountErrorBadCredentials = 0x2F;
 constexpr std::size_t kAccountWaitModalId = 0x220u;
 constexpr int kAccountRowConnect = 2;
 constexpr int kAccountRowCreate = 3;
+// XTwoKAccountMenu: activation when the screen opens (vtable slot 75, +0x12C, no argument). It sends
+// the screen straight back (GoBack(1)) when a 2K account is already linked (0x9CD7A0 on the 2K
+// manager's +0x50) or 2K is unavailable. Found by logging GoBack's caller with a linked account.
+constexpr std::uintptr_t kRvaAccountActivate = 0x8F2BE0u;
+// XSequentialMenu::GoBack(bool sound), __thiscall, ret 4: back to the previous screen.
+constexpr std::uintptr_t kRvaMenuGoBack = 0x7430B0u;
 
 // XMenuLevelUtilityScreen: the main menu's "2K account" box (logo + "NOT LINKED" state), updated
 // by 0xCA9000 with these native GFxObject functions (__thiscall):

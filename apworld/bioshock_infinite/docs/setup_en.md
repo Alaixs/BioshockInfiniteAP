@@ -29,6 +29,10 @@ To turn that off, press the button shown next to **[X] AUTO-CONNECT** on the log
 it). If the connection drops, the mod tries again every few seconds. Anything you buy or pick up
 while disconnected is sent once you are back online.
 
+The ARCHIPELAGO button replaces the game's **2K ACCOUNT** button, and the mod never talks to 2K. A 2K
+account already linked stays linked and changes nothing to the mod. To link or unlink one, remove
+the DLL while you do it.
+
 ## Playing
 
 Load your game and visit a Dollar Bill vending machine: the Archipelago items are listed below its
@@ -41,5 +45,7 @@ There is no chat in the game. For chat and server commands (`!hint`, `!release`.
 
 - No ARCHIPELAGO button: open `BioShockAP.log`. "unknown build" means the game is not the current
   Steam version; no log at all means the DLL is not in `Binaries\Win32`.
+- The login screen closes as soon as it opens: a 2K account is linked and the mod is 0.2.1 or
+  older. Update the mod.
 - To report a problem, [open an issue](https://github.com/Alaixs/BioshockInfiniteAP/issues) with
   your `BioShockAP.log`.

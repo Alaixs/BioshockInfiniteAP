@@ -7,7 +7,8 @@
 //   - LOG IN starts ap_client, with the game's modals for waiting, success and errors. The fields
 //     are filled with the last successful login.
 //   - A third button hint, "[X] AUTO-CONNECT", sets whether that login is used at startup.
-// Nothing reaches 2K: the 2K code of these buttons is never called.
+// Nothing reaches 2K: the 2K code of these buttons is never called. The screen's activation would
+// send it back at once when a real 2K account is linked: that GoBack is skipped.
 //
 // Game thread only.
 
