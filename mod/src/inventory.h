@@ -14,8 +14,9 @@
 //
 // The choice screen needs a container: the mod spawns an invisible Pickup_Base_StableTonic (in
 // every level) under Booker with the three Loot_StableTonic_*_Bonus_1 choices and opens it like a
-// bottle. Accept is intercepted (the mod gives the item itself); the container is shut down when
-// the screen closes. Cancel brings the screen back 20 s later.
+// bottle. Accept is intercepted (shield refused before Booker has it), then the game applies the
+// choice like a real bottle's; the container is shut down when the screen closes. Cancel brings
+// the screen back 20 s later.
 //
 // ServerTransactLootItem(id, 1, Money, 0) gives an item like a free purchase but crashes if the
 // item isn't in memory. Each level only loads its own items (no Infusion at the start of Town

@@ -233,9 +233,11 @@ bool OpenChoiceScreen(const void* controller) {
 
 using Accept_t = int(__fastcall*)(void* screen, void* edx);
 Accept_t g_originalAccept = nullptr;
+bool g_choiceApplied = false;  // the game applied the choice itself (its own Accept)
 
-// For our container, the choice is recorded and the screen closes as after a real choice;
-// infusionpick gives the item.
+// For our container, the choice is checked and recorded, then the game applies it like a real
+// bottle's. Giving the item instead (ServerTransactLootItem) shows an "item received" card after
+// the choice; infusionpick only does that if the game's Accept didn't run.
 int __fastcall AcceptDetour(void* screen, void* edx) {
     using Controller_t = const void*(__fastcall*)(void* self, void* edx);
     const void* pc = reinterpret_cast<Controller_t>(Base() + build::kRvaScreenOwnerController)(screen, nullptr);
@@ -249,7 +251,9 @@ int __fastcall AcceptDetour(void* screen, void* edx) {
     if (index < 0 || index > 2) return 0;
     if (!AcceptChoice(pc, index)) return 1;  // the screen closes, the choice will be asked again
     Log("inventory: Infusion chosen on screen: %d (item %d)", index, kInfusionChoices[index]);
-    return 1;
+    const int result = g_originalAccept(screen, edx);
+    g_choiceApplied = true;
+    return result;
 }
 
 void EnsureAcceptHook() {
@@ -511,11 +515,14 @@ bool Command(const std::string& cmd, const std::string& arg, const void* control
             apnotify::ShowNoShield();
             reply("err Infusion choice pending");
         } else {
-            bool given = false;
-            const DWORD lastGrant = g_lastGrantAt;  // an Infusion has no tutorial to wait for
-            GiveItem(controller, kInfusionChoices[g_pickChoice],
-                     [&](const std::string& line) { given = line.rfind("called ", 0) == 0; });
-            g_lastGrantAt = lastGrant;
+            bool given = g_choiceApplied;
+            if (!given) {
+                const DWORD lastGrant = g_lastGrantAt;  // an Infusion has no tutorial to wait for
+                GiveItem(controller, kInfusionChoices[g_pickChoice],
+                         [&](const std::string& line) { given = line.rfind("called ", 0) == 0; });
+                g_lastGrantAt = lastGrant;
+            }
+            g_choiceApplied = false;
             if (given) {
                 savedata::Set(controller, variable, 1);
                 Log("inventory: Infusion given (%s)", arg.c_str());
