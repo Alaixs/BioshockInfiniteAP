@@ -7,8 +7,9 @@ PersistentLevel) whose archetype is named "Pickup_AudioLog_<id>". Its title, spe
 place shown by the game come from the English translations (PreCoalescedItemAssets.INT, section
 [Consumable_AudioLog_<id> XAudioLogItem]). Writes apworld/bioshock_infinite/voxophones.py.
 
-Excluded: the base archetype "Pickup_AudioLog_Base". The S_DCOM_* packages are Comstock House (base
-game, end of the Emporia chapter); the Burial at Sea DLC is separate (DLC folder).
+Excluded: the base archetype "Pickup_AudioLog_Base". The S_DCOM_* and DCOM_* packages are Comstock
+House (base game, end of the Emporia chapter); the Burial at Sea DLC is separate (DLC folder). The
+levels read are game.level_packages().
 """
 
 from __future__ import annotations
@@ -17,7 +18,7 @@ import pathlib
 import re
 import struct
 
-from game import COOKED, XGAME
+from game import XGAME, level_packages, level_prefix
 from upk import Package
 
 TRANSLATIONS = XGAME / "Localization" / "INT" / "PreCoalescedItemAssets.INT"
@@ -88,7 +89,7 @@ def recording_of(pkg: Package, exp) -> str | None:
 def placed() -> dict[str, str]:
     """Voxophone id -> level package where it is placed (the first one found)."""
     found: dict[str, str] = {}
-    for f in sorted(COOKED.glob("S_*.xxx")):
+    for f in level_packages():
         try:
             pkg = Package(str(f))
         except Exception:
@@ -115,7 +116,7 @@ def main() -> None:
     names = translations()
     rows = []
     for vox_id, package in placed().items():
-        prefix = package.split("_")[1].lower()
+        prefix = level_prefix(package)
         if prefix not in AREAS:
             raise SystemExit(f"{vox_id}: unknown area for package {package}")
         info = names.get(ALIASES.get(vox_id, vox_id).lower())

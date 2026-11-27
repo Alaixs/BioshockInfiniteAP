@@ -42,3 +42,21 @@ GAME_DIR = find_game()
 XGAME = GAME_DIR / "XGame"
 # The cooked packages folder depends on the install language (CookedPCConsole, CookedPCConsole_FR...).
 COOKED = next(iter(sorted(XGAME.glob("CookedPCConsole*"))), XGAME / "CookedPCConsole")
+
+# Level packages: "S_<area>_..." (any case), plus Comstock House's sublevels, cooked without the
+# prefix (DCOM_Torture, DCOM_WardenSecurity...): until 0.2.2 the tools only read S_*, and missed
+# their Voxophones and Gear. Without the S_Lut_* ones: the Sea of Doors and the ending, loaded by
+# S_Lut_P once the Siphon is destroyed (the goal), so nothing there can be a location.
+LEVEL_GLOBS = ("S_*.xxx", "DCOM_*.xxx")
+AFTER_GOAL_LEVELS = ("s_lut_",)
+
+
+def level_packages() -> list[pathlib.Path]:
+    found = {f for pattern in LEVEL_GLOBS for f in COOKED.glob(pattern)}
+    return sorted(f for f in found if not f.stem.lower().startswith(AFTER_GOAL_LEVELS))
+
+
+def level_prefix(package: str) -> str:
+    """Story part of a level package's name: S_TWN_Float_B_Loot -> twn, DCOM_Torture -> dcom."""
+    parts = package.lower().split("_")
+    return parts[1] if parts[0] == "s" else parts[0]

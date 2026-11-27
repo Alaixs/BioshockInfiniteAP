@@ -20,7 +20,7 @@ import math
 import pathlib
 
 from catalog_voxophones import ALIASES, AREAS, PREFIX, ascii_text, recording_of, translations
-from game import COOKED
+from game import level_packages, level_prefix
 from upk import Package
 
 OUT = pathlib.Path(__file__).parent.parent / "apworld" / "bioshock_infinite" / "infusions.py"
@@ -31,7 +31,7 @@ SEASON_PASS = {"S_TWN_Float_B_Loot"}
 
 
 def area_of(package: str) -> str:
-    prefix = package.split("_")[1].lower()
+    prefix = level_prefix(package)
     if prefix not in AREAS:
         raise SystemExit(f"unknown area for package {package}")
     return AREAS[prefix]
@@ -41,7 +41,7 @@ def scan() -> tuple[list[tuple[str, str, tuple]], list[tuple[str, str, tuple]]]:
     """(bottles, Voxophones): (area, id or place, position)."""
     names = translations()
     infusions, voxophones = [], []
-    for f in sorted(COOKED.glob("S_*.xxx")):
+    for f in level_packages():
         if f.stem in SEASON_PASS:
             continue
         try:

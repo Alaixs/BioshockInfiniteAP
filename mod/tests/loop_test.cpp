@@ -863,7 +863,7 @@ int main(int argc, char** argv) {
     std::printf("\n== Gear ==\n");
     {
         const std::string serverLog = argv[3];
-        Check(g_game.apGear.size() == 32, "the 32 Gear packages are handed to the mod (gearap)");
+        Check(g_game.apGear.size() == 33, "the 33 Gear packages are handed to the mod (gearap)");
         g_sink("event gear S_TWN_Aviary_Loot.XLootContainerKActor_1");
         Check(Pump(5000, [&] { return ReadFile(serverLog).find("Gear - Town Center 1") != std::string::npos; }),
               "Gear package picked up: check sent");

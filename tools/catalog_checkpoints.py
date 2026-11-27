@@ -20,7 +20,7 @@ import re
 import struct
 
 from catalog_voxophones import title_case
-from game import COOKED, XGAME
+from game import COOKED, XGAME, level_packages
 from upk import Package
 
 OUT = pathlib.Path(__file__).parent.parent / "apworld" / "bioshock_infinite" / "checkpoints.py"
@@ -84,7 +84,7 @@ def titles() -> list[str]:
 
 def used_by_scripts() -> set[str]:
     used: set[str] = set()
-    for f in sorted(COOKED.glob("S_*.xxx")):
+    for f in level_packages():
         try:
             pkg = Package(str(f))
         except Exception:

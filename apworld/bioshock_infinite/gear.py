@@ -22,6 +22,8 @@ GEAR_PICKUPS: list[tuple[str, str, str]] = [
     ('Finkton', 'S_Fink_Lockup_Geo2.XLootContainerKActor_5', 'The Bull House'),  # Voxophone 26 m away
     ('Finkton', 'S_Fink_Shanty_Underpass_Geo.XLootContainerKActor_1', ''),  # Voxophone 50 m away
     ('Finkton', 'S_Fink_Terr_Geo.XLootContainerKActor_14', ''),  # Voxophone 204 m away
+    ('Emporia', 'DCOM_PrisonWorkshop.XLootContainerKActor_0', 'Where We Work'),  # Voxophone 11 m away
+    ('Emporia', 'DCOM_WardenSecurity.XLootContainerKActor_1', "Warden's Office"),  # Voxophone 22 m away
     ('Emporia', 'S_EMP_BankInt_Geo.XLootContainerKActor_5', ''),  # Voxophone 55 m away
     ('Emporia', 'S_EMP_BankInt_Loot.XLootContainerKActor_4', ''),  # Voxophone 53 m away
     ('Emporia', 'S_EMP_BombStore_Loot.XLootContainerKActor_3', 'Harmony Lane'),  # Voxophone 15 m away
@@ -32,7 +34,6 @@ GEAR_PICKUPS: list[tuple[str, str, str]] = [
     ('Emporia', 'S_EMP_StationCafe_Geo.XLootContainerKActor_8', 'Salty Oyster Bar'),  # Voxophone 30 m away
     ('Emporia', 'S_EMP_StatueStreetStore_Geo.XLootContainerKActor_88', 'Downtown Emporia'),  # Voxophone 7 m away
     ('Emporia', 'S_EMP_Street_Geo.XLootContainerKActor_93', ''),  # Voxophone 80 m away
-    ('Emporia', 'S_Lut_BabyDoor_geo.XLootContainerKActor_4', ''),  # Voxophone 1091 m away
     ('Hand of the Prophet', 'S_CHU_BigZeppelin_Deck2_Loot.XLootContainerKActor_81', ''),  # Voxophone 73 m away
 ]
 

@@ -182,15 +182,44 @@ VOXOPHONE_LOCATIONS: list[tuple[str, str, str]] = [
 location_name_to_id: dict[str, int] = {
     name: BASE_ID + index for index, (name, _, _) in enumerate(SHOP_LOCATIONS, start=1)
 }
+
+# Placed objects found after their kind's first release (game id, in the order added): numbered
+# after the others, so that no existing id moves. 0.2.3: Comstock House's sublevels without the S_
+# prefix (DCOM_*), which the tools didn't read.
+ADDED_PICKUPS: dict[str, list[str]] = {
+    "voxophone": [
+        "E_Freedom_From_Choice",
+        "E_One_Last_Chance",
+        "E_Smothered_In_The_Crib",
+        "OE_Untitled_Old_Elizabeth_Log03",
+    ],
+    "gear": ["DCOM_PrisonWorkshop.XLootContainerKActor_0", "DCOM_WardenSecurity.XLootContainerKActor_1"],
+}
+# Placed objects that are no longer locations: (kind, game id, former location name). They keep
+# their place in the numbering, their id is never given again. 0.2.3: the Phoenix package of the
+# ending (Sea of Doors, after the goal).
+RETIRED_PICKUPS: list[tuple[str, str, str]] = [
+    ("gear", "S_Lut_BabyDoor_geo.XLootContainerKActor_4", "Gear - Emporia 7"),
+]
+
+
+def pickup_ids(kind: str, base: int, idents: list[str]) -> dict[str, int]:
+    """Game id -> location id: base + 1... in the order of the game's ids (lowercase) for the
+    original ones, retired ones included; then the added ones, in their order."""
+    added = ADDED_PICKUPS.get(kind, [])
+    retired = [ident for k, ident, _ in RETIRED_PICKUPS if k == kind]
+    original = sorted([i for i in idents if i not in added] + retired, key=str.lower)
+    return {ident: base + index for index, ident in enumerate([*original, *added], start=1)}
+
+
+# Former location name -> its id, kept out of use.
+RETIRED_LOCATION_IDS: dict[str, int] = {}
+
 # From BASE_ID + 1000 on, in the order of the game's ids: a location keeps its number even if the
 # list changes order.
 VOXOPHONE_BASE_ID = BASE_ID + 1000
-location_name_to_id.update(
-    {
-        name: VOXOPHONE_BASE_ID + index
-        for index, (name, _, _) in enumerate(sorted(VOXOPHONE_LOCATIONS, key=lambda v: v[2].lower()), start=1)
-    }
-)
+_ids = pickup_ids("voxophone", VOXOPHONE_BASE_ID, [recording for _, _, recording in VOXOPHONE_LOCATIONS])
+location_name_to_id.update({name: _ids[recording] for name, _, recording in VOXOPHONE_LOCATIONS})
 
 # Infusions: (location name, area, bottle id in the game), from BASE_ID + 2000 on, in the order of
 # the game's ids.
@@ -218,12 +247,9 @@ VIGOR_LOCATIONS: list[tuple[str, str, str]] = [
 GEAR_LOCATIONS: list[tuple[str, str, str]] = [
     (name, area, ident) for name, (area, ident, _) in zip(numbered_location_names("Gear", GEAR_PICKUPS), GEAR_PICKUPS)
 ]
-location_name_to_id.update(
-    {
-        name: BASE_ID + 4000 + index
-        for index, (name, _, _) in enumerate(sorted(GEAR_LOCATIONS, key=lambda g: g[2].lower()), start=1)
-    }
-)
+_ids = pickup_ids("gear", BASE_ID + 4000, [ident for _, _, ident in GEAR_LOCATIONS])
+location_name_to_id.update({name: _ids[ident] for name, _, ident in GEAR_LOCATIONS})
+RETIRED_LOCATION_IDS.update({name: _ids[ident] for kind, ident, name in RETIRED_PICKUPS if kind == "gear"})
 
 # Upgrade machines: (area, number in the area for this kind, kind, paths). Archipelago rows are sold
 # there like in the Dollar Bills; location BASE_ID + 5000 + 10 * index + row.

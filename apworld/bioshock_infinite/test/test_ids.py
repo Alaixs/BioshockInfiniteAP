@@ -1,6 +1,7 @@
 """Ids are stored in every generated seed and in players' saves: an id never changes or moves to
 another name. ids.json records them. New items and locations are added to it, never edited: set
 BSAP_UPDATE_IDS=1 and run the tests once (python apworld/run_tests.py <Archipelago checkout>).
+A location that can't be reached stays in it: data.RETIRED_LOCATION_IDS keeps its id out of use.
 """
 
 import json
@@ -8,7 +9,7 @@ import os
 import pathlib
 import unittest
 
-from ..data import item_name_to_id, location_name_to_id
+from ..data import RETIRED_LOCATION_IDS, item_name_to_id, location_name_to_id
 
 SNAPSHOT = pathlib.Path(__file__).with_name("ids.json")
 
@@ -31,6 +32,11 @@ class TestIds(unittest.TestCase):
         for kind in ("items", "locations"):
             with self.subTest(kind):
                 for name, ident in recorded[kind].items():
+                    if kind == "locations" and name in RETIRED_LOCATION_IDS:
+                        self.assertEqual(RETIRED_LOCATION_IDS[name], ident, f"retired {name!r} must keep id {ident}")
+                        self.assertNotIn(name, current[kind], f"retired {name!r} is still a location")
+                        self.assertNotIn(ident, current[kind].values(), f"id {ident} of retired {name!r} reused")
+                        continue
                     self.assertEqual(current[kind].get(name), ident, f"{name!r} must keep id {ident}")
                 new = sorted(name for name in current[kind] if name not in recorded[kind])
                 self.assertFalse(new, f"new {kind} missing from ids.json (BSAP_UPDATE_IDS=1): {new}")
