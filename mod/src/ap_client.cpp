@@ -539,15 +539,24 @@ void SyncVigorLocks() {
         else
             owned += v.key + ":" + std::to_string(v.lookup) + " ";
     }
-    if (g_sentVigorLocks && *g_sentVigorLocks == locked + "|" + owned) return;
+    // Location not checked yet: the bottle sends it even if the Vigor is already received.
+    std::string pending;
+    for (const auto& [key, loc] : g_vigorLocations) {
+        if (!g_checked.count(loc)) pending += key + " ";
+    }
+    const std::string sent = locked + "|" + owned + "|" + pending;
+    if (g_sentVigorLocks && *g_sentVigorLocks == sent) return;
     bridge::Inject("vigorlock clear");
     std::istringstream keys(locked);
     for (std::string key; keys >> key;) bridge::Inject("vigorlock " + key);
+    bridge::Inject("vigorpending clear");
+    std::istringstream pendingKeys(pending);
+    for (std::string key; pendingKeys >> key;) bridge::Inject("vigorpending " + key);
     // Received: the mod gives them again if a game script removes them (a chapter's loadout).
     bridge::Inject("vigorown clear");
     std::istringstream pairs(owned);
     for (std::string pair; pairs >> pair;) bridge::Inject("vigorown " + pair);
-    g_sentVigorLocks = locked + "|" + owned;
+    g_sentVigorLocks = sent;
 }
 
 void Sync() {

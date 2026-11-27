@@ -8,8 +8,8 @@
 //   gears       -> "gear <id> <state>" for each loaded Gear package, then "end gears N"
 //   gearap <id>|clear           Gear packages that are locations
 // Picking up an AP bottle or package opens no screen and gives nothing: it is marked looted and its
-// check sent. Same for a bottle or drop of a locked Vigor (vigors::LockedKey): "event vigor <key>",
-// without the drinking animation and tutorial.
+// check sent. Same for a bottle or drop of a Vigor locked or whose location is not checked yet
+// (vigors::BottleKey): "event vigor <key>", without the drinking animation and tutorial.
 //
 // Voxophone: XLootContainerKActor with a Pickup_AudioLog_* archetype; <id> from its
 // LootDefinitionList (Loot_Consumable_AudioLog_<id>). <state> is CurrentLootableState: 4 once

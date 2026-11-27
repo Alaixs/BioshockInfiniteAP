@@ -231,9 +231,10 @@ namespace {
 using OpenSearch_t = void(__fastcall*)(void* controller, void* edx, void* container);
 OpenSearch_t g_originalOpenSearch[3] = {};
 
-// Locked Vigor in a bottle or an enemy's drop: from the archetype, else the loot list.
-const char* LockedVigorIn(const void* container, const std::string& archetype) {
-    if (const char* key = vigors::LockedKey(archetype)) return key;
+// Vigor bottle or enemy drop that the mod takes (vigors::BottleKey): from the archetype, else the
+// loot list.
+const char* VigorBottleIn(const void* container, const std::string& archetype) {
+    if (const char* key = vigors::BottleKey(archetype)) return key;
     ue3::Property p;
     ue3::ArrayHeader list{};
     if (!ue3::FindProperty(container, "LootDefinitionList", &p) ||
@@ -243,7 +244,7 @@ const char* LockedVigorIn(const void* container, const std::string& archetype) {
     for (int i = 0; i < list.num && i < 8; ++i) {
         const void* loot = nullptr;
         ue3::ReadBytes(list.data + i * sizeof(void*), &loot, sizeof(loot));
-        if (const char* key = vigors::LockedKey(ue3::ObjectName(loot))) return key;
+        if (const char* key = vigors::BottleKey(ue3::ObjectName(loot))) return key;
     }
     return nullptr;
 }
@@ -254,21 +255,22 @@ void SetLooted(const void* container) {
     reinterpret_cast<SetLooted_t>(base + build::kRvaReactiveActorSetLooted)(container, nullptr);
 }
 
-// Locked Vigor: taken without the drinking animation and tutorial (vigors would remove it right
-// after anyway). SetLooted still fires the container's Kismet events.
-bool TakeLockedVigor(const void* container, const char* how) {
+// Locked Vigor, or one whose location isn't checked yet: taken without the drinking animation and
+// tutorial (vigors would remove a locked one right after anyway, and a received one is given by the
+// mod). SetLooted still fires the container's Kismet events.
+bool TakeVigorBottle(const void* container, const char* how) {
     const std::string archetype = ArchetypeName(container);
-    const char* key = LockedVigorIn(container, archetype);
+    const char* key = VigorBottleIn(container, archetype);
     if (!key) return false;
     SetLooted(container);
-    Log("collect: locked Vigor %s taken without drinking (%s, %s)", key, archetype.c_str(), how);
+    Log("collect: Vigor %s taken without drinking (%s, %s)", key, archetype.c_str(), how);
     bridge::Send(std::string("event vigor ") + key);
     return true;
 }
 
 bool SkipSearch(const void* container) {
     if (!ue3::IsObject(container) || ue3::ClassName(container) != "XLootContainerKActor") return false;
-    if (TakeLockedVigor(container, "search")) return true;
+    if (TakeVigorBottle(container, "search")) return true;
     const std::string archetype = ArchetypeName(container);
     if (g_apInfusions.empty() && g_apGear.empty()) return false;
     const std::set<std::string>* ap = nullptr;
@@ -325,13 +327,13 @@ bool Intercept(const void* self, const void* func, const void* parms) {
     const void* target = *static_cast<const void* const*>(parms);  // UsableObject, first parameter
     if (!ue3::IsObject(target)) return false;
     if (ue3::ClassName(target) != "XLootContainerKActor") {
-        if (LockedVigorIn(target, ArchetypeName(target))) {
-            Log("collect: locked Vigor in a %s, not taken (%s)", ue3::ClassName(target).c_str(),
+        if (VigorBottleIn(target, ArchetypeName(target))) {
+            Log("collect: Vigor bottle in a %s, not taken (%s)", ue3::ClassName(target).c_str(),
                 ue3::PathName(target).c_str());
         }
         return false;
     }
-    return TakeLockedVigor(target, "use");
+    return TakeVigorBottle(target, "use");
 }
 
 bool Command(const std::string& cmd, const std::string& arg, const Reply& reply) {

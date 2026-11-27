@@ -66,6 +66,7 @@ struct FakeGame {
     std::set<std::string> apInfusions;
     std::set<std::string> vigorLocks;
     std::set<std::string> vigorsOwned;
+    std::set<std::string> vigorsPending;  // location not checked yet
     std::set<std::string> apGear;
     std::vector<std::uint64_t> gear;  // Gear pieces given (ServerTransactLootItem, 64 bits)
     std::vector<int> onceGiven;
@@ -141,6 +142,14 @@ struct FakeGame {
             else
                 vigorsOwned.insert(key);
             g_sink("ok vigorown " + std::to_string(vigorsOwned.size()));
+        } else if (cmd == "vigorpending") {
+            std::string key;
+            in >> key;
+            if (key == "clear")
+                vigorsPending.clear();
+            else
+                vigorsPending.insert(key);
+            g_sink("ok vigorpending " + std::to_string(vigorsPending.size()));
         } else if (cmd == "infusions") {
             for (const auto& [id, state] : infusions) g_sink("infusion " + id + " " + std::to_string(state));
             g_sink("end infusions " + std::to_string(infusions.size()));
@@ -748,8 +757,12 @@ int main(int argc, char** argv) {
             {"returntosender", "Vigor - Return to Sender (Downtown Emporia)"}};
         const std::string locked = g_game.vigorLocks.empty() ? "charge" : *g_game.vigorLocks.begin();
         g_sink("event vigor " + locked);
+        Check(g_game.vigorsPending.count(locked) == 1, "Vigor location not checked yet: its bottle sends it");
         Check(Pump(5000, [&] { return ReadFile(serverLog).find(places.at(locked)) != std::string::npos; }),
               "Vigor found in the game: check sent");
+        // Even once the Vigor is received, its bottle stays the mod's until its location is checked.
+        Check(Pump(10000, [&] { return !g_game.vigorsPending.count(locked); }),
+              "Vigor location checked: its bottle is vanilla again");
         // "Vigor: Murder of Crows" -> "murderofcrows". The bought Vigor's own lock is checked, not the count:
         // the location just checked may hold one of our Vigors too, unlocked meanwhile.
         const auto keyOf = [](const std::string& name) {

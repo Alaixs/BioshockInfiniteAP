@@ -39,6 +39,8 @@ constexpr char kLoanedSuffix[] = "_twn_fair";  // Bucking Bronco lent by the Fai
 constexpr std::size_t kMaxInventorySlots = 36;
 
 std::set<std::string> g_locked;
+// Vigors whose location isn't checked yet: their bottle sends it, even once the Vigor is received.
+std::set<std::string> g_pending;
 // Received Vigors (key -> item of the bottle), and since when each has been missing.
 std::map<std::string, int> g_owned;
 std::map<std::string, DWORD> g_missingSince;
@@ -255,12 +257,12 @@ void Tick(const void* controller) {
     RegiveOwned(slots);
 }
 
-const char* LockedKey(const std::string& name) {
+const char* BottleKey(const std::string& name) {
     const std::string lower = Lower(name);
     const std::size_t at = lower.find("plasmid_");
     if (at == std::string::npos || lower.find(kLoanedSuffix) != std::string::npos) return nullptr;
     const char* key = KeyOf(lower.substr(at));
-    return key && g_locked.count(key) ? key : nullptr;
+    return key && (g_locked.count(key) || g_pending.count(key)) ? key : nullptr;
 }
 
 bool Command(const std::string& cmd, const std::string& arg, const void* controller, const Reply& reply) {
@@ -270,6 +272,12 @@ bool Command(const std::string& cmd, const std::string& arg, const void* control
         else if (!arg.empty())
             g_locked.insert(Lower(arg));
         reply("ok vigorlock " + std::to_string(g_locked.size()));
+    } else if (cmd == "vigorpending") {
+        if (arg == "clear")
+            g_pending.clear();
+        else if (!arg.empty())
+            g_pending.insert(Lower(arg));
+        reply("ok vigorpending " + std::to_string(g_pending.size()));
     } else if (cmd == "vigorown") {
         // vigorown <key>:<item> | clear
         const std::size_t colon = arg.find(':');

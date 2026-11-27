@@ -4,6 +4,7 @@
 //
 //   vigorlock <key>|clear         Vigors Booker must not have (sent by the client: those whose
 //                                 Archipelago item has not been received yet)
+//   vigorpending <key>|clear      Vigors whose location is not checked yet (sent by the client)
 //   vigorown <key>:<item>|clear   Vigors received from Archipelago (item = XItemDatabase bottle):
 //                                 given again if missing (a chapter's loadout script removes them)
 //   vigors                        -> "vigor <archetype>" for each of Booker's Vigors, then
@@ -17,7 +18,10 @@
 // (0.2.0), the quest stayed on "take the Vigor from the Fireman". Nor is the Bucking Bronco lent by a
 // Fair booth (Plasmid_BuckingBronco_Twn_Fair).
 //
-// A locked Vigor's bottle or drop is taken without drinking it (collect). One that still lands in the
+// The bottle or drop of a locked Vigor, or of one whose location is not checked yet, is taken
+// without drinking it (collect) and sends that location: a Vigor received before its bottle is
+// found must not leave that bottle vanilla, its location impossible (0.2.2 and older).
+// A locked Vigor that still lands in the
 // inventory (a chapter's loadout script, a pickup that skips the search hook) is removed
 // (XPawn.DestroyInventoryItem) and reported as "event vigor <key>", the first time being its
 // check. If it is in hand the game switches to the next one first: destroying it in hand breaks
@@ -36,10 +40,11 @@ using Reply = std::function<void(const std::string&)>;
 
 bool Command(const std::string& cmd, const std::string& arg, const void* controller, const Reply& reply);
 
-// Key of the locked Vigor named by a pickup archetype or loot definition
-// (Pickup_Plasmid_MurderofCrows_Founder_MaxAmmo, Loot_Consumable_Plasmid_MurderOfCrows_Founder_AIDrop),
-// nullptr if none. collect skips the pickup of such a bottle: no drinking, no tutorial.
-const char* LockedKey(const std::string& name);
+// Key of the Vigor named by a pickup archetype or loot definition
+// (Pickup_Plasmid_MurderofCrows_Founder_MaxAmmo, Loot_Consumable_Plasmid_MurderOfCrows_Founder_AIDrop)
+// if it is locked or its location not checked yet, nullptr otherwise. collect takes such a bottle
+// itself: no drinking, no tutorial, and the location is sent.
+const char* BottleKey(const std::string& name);
 void Tick(const void* controller);
 
 }  // namespace bsap::vigors
