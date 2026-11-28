@@ -511,7 +511,7 @@ void DrawPanel(const void* canvas) {
     const FontScope font(canvas);
     const Target* selected = SelectedTarget();
     std::vector<std::wstring> lines;
-    lines.push_back(L"BioShockAP debug    [F6] hide   [F7] next target   [F8] teleport");
+    lines.push_back(L"BioShockAP debug    [F6] hide   [F7] next target   [F8] teleport   [F9] 1 m forward");
     lines.push_back(std::wstring(L"[F4] infinite health: ") + (g_god ? L"ON" : L"off") + L"   [F5] one-hit enemies: " +
                     (g_oneHit ? L"ON" : L"off"));
     const std::wstring traps = traps::ActiveSummary();
@@ -650,6 +650,9 @@ void HandleKeys(const void* controller) {
         }
         if (KeyPressed('6')) traps::Command("trap", "trap scream", controller, ignore);
         if (KeyPressed('0')) traps::Command("trap", "trap stop", controller, ignore);
+    }
+    if (KeyPressed(VK_F9)) {
+        Flash(world::TeleportForward(controller, 100.0f) ? "Teleported 1 m forward" : "Cannot teleport");
     }
     if (KeyPressed(VK_F7)) ++g_selected;
     if (KeyPressed(VK_F8)) {

@@ -183,6 +183,17 @@ bool TeleportTo(const void* controller, const void* actor) {
     return TeleportInFront(controller, actor, [](const std::string&) {});
 }
 
+bool TeleportForward(const void* controller, float distance) {
+    const void* pawn = PawnOf(controller);
+    Vec3 loc{};
+    Rot rot{};
+    if (!pawn || !Placement(pawn, &loc, nullptr) || !Placement(controller, nullptr, &rot)) return false;
+    const double yaw = rot.yaw * 2.0 * kPi / kUnitsPerTurn;
+    const Vec3 dest{loc.x + static_cast<float>(distance * std::cos(yaw)),
+                    loc.y + static_cast<float>(distance * std::sin(yaw)), loc.z};
+    return Teleport(controller, dest, rot, [](const std::string&) {});
+}
+
 bool Command(const std::string& cmd, const std::string& line, const void* controller, const Reply& reply) {
     std::istringstream in(line);
     std::string skip;

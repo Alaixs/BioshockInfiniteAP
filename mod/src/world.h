@@ -40,5 +40,8 @@ bool ActorBounds(const void* actor, Box* out);
 std::string LoadedMaps();
 // Teleports the player 1.5 m in front of the actor, facing it (like "tpto").
 bool TeleportTo(const void* controller, const void* actor);
+// Teleports the player `distance` units ahead, in the camera's heading, view unchanged. The engine
+// moves the character back out of walls.
+bool TeleportForward(const void* controller, float distance);
 
 }  // namespace bsap::world

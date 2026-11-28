@@ -11,6 +11,7 @@
 // Keys (when the game has focus):
 //   F4  infinite health        F5  one-hit enemies
 //   F6  show / hide            F7  next target (nearest first)    F8  teleport to the target
+//   F9  teleport 1 m forward (camera heading)
 //   Ctrl+1..6  test traps      Ctrl+0  end traps
 //
 // Drawing goes through the ProcessEvent hook: the frames after XPlayerController.PostRender

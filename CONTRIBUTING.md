@@ -117,7 +117,7 @@ and the game behavior it relies on. Read it before changing the module.
 `debug=1` in `BioShockAP.ini` (next to the DLL, created after the first connection) adds:
 
 - an overlay with the connection state and frames around the checks left nearby (F6 to toggle,
-  F7 next target, F8 teleport to it);
+  F7 next target, F8 teleport to it, F9 teleport 1 m forward);
 - test helpers: F4 infinite health, F5 one-hit enemies, Ctrl+1..6 traps, Ctrl+0 to stop them;
 - a text command bridge on `127.0.0.1:38300`, with every command of the modules and inspection
   tools (`props`, `get`, `trace`...): see the header comments in `mod/src`.
