@@ -5,8 +5,17 @@
 The game saves when a script runs XSeqAct_Checkpoint; the action points to an entry of the
 SPCheckpointDisplayInfo table (XCheckpointDisplayInfo, DefaultPCBenchmarkMap package) by
 CheckpointDisplayInfoStructLookupName. That table gives the title shown while loading
-(Localization/INT/Arc_XGameInfo.INT, same order). Its entries 0 to 36 are the chapters of the
-"Load Chapter" menu (Welcome Center ... Command Deck); the next ones are finer steps.
+(Localization/INT/Arc_XGameInfo.INT, same order).
+
+Chapters: the "Load Chapter" menu lists the bookmark saves (Steam userdata,
+8870/remote/SaveData, <step>-<date>.bkm; the other autosaves have another extension). The game
+writes one for a script checkpoint with bIsBookMark (XSeqAct_Checkpoint bit 1, passed to the save
+function at 0xAECE20 as CurrentCheckpointIsABookmark), and for some travels to a new map, named
+after their loading screen (XSeqAct_ShowLoadingScreen): that second rule can't be read from the
+packages. So the chapters come from the .bkm files of a complete playthrough (40): the table's
+entries 0 to 36 (Welcome Center ... Command Deck), plus Fink (Finkton Docks, entry 41, until 0.2.2
+a checkpoint here), S_Light_P (The Lighthouse, no script checkpoint: not a step) and LutT_Start
+(after the goal).
 
 The mod sees a step reached when the action's SequenceOp.ActivateCount counter becomes 1.
 Kept: the entries an XSeqAct_Checkpoint uses (the others are never seen by the mod), except those
@@ -26,6 +35,7 @@ from upk import Package
 OUT = pathlib.Path(__file__).parent.parent / "apworld" / "bioshock_infinite" / "checkpoints.py"
 TABLE = "SPCheckpointDisplayInfo"
 CHAPTERS = 37  # entries 0..36: "Load Chapter" chapters
+EXTRA_CHAPTERS = {"Fink"}  # also bookmark saves (see above)
 AFTER_GOAL = ("LutT_", "Lut", "OFB", "ReturnToMain")
 FIXES = {"Z.h. ": "Z.H. ", "Sky-line": "Sky-Line"}
 # Story area from the name prefix (the opening lighthouse counts as Town Center; Comstock House is
@@ -108,7 +118,7 @@ def main() -> None:
         raise SystemExit(f"table: {len(names)} names for {len(shown)} titles")
     used = used_by_scripts()
     rows = [
-        (i < CHAPTERS, area_of(name), name, title)
+        (i < CHAPTERS or name in EXTRA_CHAPTERS, area_of(name), name, title)
         for i, (name, title) in enumerate(zip(names, shown))
         if name in used and not name.startswith(AFTER_GOAL)
     ]

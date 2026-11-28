@@ -2,6 +2,7 @@
 another name. ids.json records them. New items and locations are added to it, never edited: set
 BSAP_UPDATE_IDS=1 and run the tests once (python apworld/run_tests.py <Archipelago checkout>).
 A location that can't be reached stays in it: data.RETIRED_LOCATION_IDS keeps its id out of use.
+A renamed location (data.RENAMED_LOCATIONS) keeps its id under its new name.
 """
 
 import json
@@ -9,7 +10,7 @@ import os
 import pathlib
 import unittest
 
-from ..data import RETIRED_LOCATION_IDS, item_name_to_id, location_name_to_id
+from ..data import RENAMED_LOCATIONS, RETIRED_LOCATION_IDS, item_name_to_id, location_name_to_id
 
 SNAPSHOT = pathlib.Path(__file__).with_name("ids.json")
 
@@ -32,6 +33,11 @@ class TestIds(unittest.TestCase):
         for kind in ("items", "locations"):
             with self.subTest(kind):
                 for name, ident in recorded[kind].items():
+                    if kind == "locations" and name in RENAMED_LOCATIONS:
+                        new_name = RENAMED_LOCATIONS[name]
+                        self.assertNotIn(name, current[kind], f"renamed {name!r} is still a location")
+                        self.assertEqual(current[kind].get(new_name), ident, f"{new_name!r} must keep id {ident}")
+                        continue
                     if kind == "locations" and name in RETIRED_LOCATION_IDS:
                         self.assertEqual(RETIRED_LOCATION_IDS[name], ident, f"retired {name!r} must keep id {ident}")
                         self.assertNotIn(name, current[kind], f"retired {name!r} is still a location")

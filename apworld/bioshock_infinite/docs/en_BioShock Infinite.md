@@ -30,7 +30,7 @@ takes it without giving you a piece and sends its Archipelago item. The 10 Seaso
 the Blue Ribbon are not locations. Gear - Harmony Lane is upstairs in the shop of the Beyond
 Redemption Voxophone: the original game hides it, so guides don't list it, but the mod shows it.
 
-With `checkpoint_checks`, reaching a point of the story sends a check: the 37 chapters of the Load
+With `checkpoint_checks`, reaching a point of the story sends a check: the 38 chapters of the Load
 Chapter menu by default (`chapters`), or every autosave checkpoint of the story (`all`, 99).
 
 With `randomize_vigors`, Murder of Crows, Bucking Bronco, Charge, Undertow and Return to Sender are

@@ -90,7 +90,7 @@ class GearAreas(OptionSet):
 
 class CheckpointChecks(Choice):
     """Reaching a point of the story sends a check.
-    Chapters: the 37 chapters of the Load Chapter menu (Welcome Center to Command Deck).
+    Chapters: the 38 chapters of the Load Chapter menu (Welcome Center to Command Deck).
     All: every autosave checkpoint of the story (99), chapters included.
     Off: no story checks."""
 

@@ -40,7 +40,7 @@ CHECKPOINTS: list[tuple[bool, str, str, str]] = [
     (True, 'Hand of the Prophet', 'CHU_Interior', 'Engineering Deck'),
     (True, 'Hand of the Prophet', 'CHU_Top', 'Command Deck'),
     (False, 'Town Center', 'Light_Top', 'The Lens Room'),
-    (False, 'Finkton', 'Fink', 'Finkton Docks'),
+    (True, 'Finkton', 'Fink', 'Finkton Docks'),
     (False, 'Emporia', 'EMP_Turnstiles', 'The Great Hall'),
     (False, 'Emporia', 'EMP_PianoScene', 'Prosperity Plaza'),
     (False, 'Emporia', 'EMP_Station', 'Grand Central Depot'),

@@ -287,6 +287,10 @@ for _chapter, _area, _step, _title in CHECKPOINTS:
     CHECKPOINT_LOCATIONS.append((_name, _area, _step, _chapter))
 location_name_to_id.update({name: BASE_ID + 6000 + i for i, (name, _, _, _) in enumerate(CHECKPOINT_LOCATIONS)})
 
+# Former location name -> current one, same id. 0.2.3: Finkton Docks is a chapter of the Load Chapter
+# menu (bookmark save), it was named as a checkpoint.
+RENAMED_LOCATIONS: dict[str, str] = {"Checkpoint - Finkton Docks": "Chapter - Finkton Docks"}
+
 location_name_groups: dict[str, set[str]] = {
     area: {
         shop_location_name(a, n, k)
