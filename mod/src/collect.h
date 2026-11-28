@@ -23,7 +23,9 @@
 // "Gear - Harmony Lane" (S_EMP_BombStore_Loot) stands in a level that the game keeps loaded but
 // hidden where it is, even in the base game: the mod makes that level visible.
 //
-// Autosave checkpoint (XSeqAct_Checkpoint): "event checkpoint <step>". Songbird destroys the Siphon
+// Autosave checkpoint (XSeqAct_Checkpoint): "event checkpoint <step>". "Return to Soldier's Field"
+// (BW_BackUpElevator) never happens in the base game, its trigger being used up on the way in: the
+// mod re-arms it on the way back (BW_WorldState_DPV 2). Songbird destroys the Siphon
 // ("TowerDestroyed" in S_CHU_LizTower_Gam): "event goal siphon".
 //
 // Game thread only.

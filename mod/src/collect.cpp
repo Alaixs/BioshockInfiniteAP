@@ -3,6 +3,7 @@
 #include "bridge.h"
 #include "game_build.h"
 #include "log.h"
+#include "savedata.h"
 #include "vigors.h"
 
 #include "MinHook.h"
@@ -239,6 +240,64 @@ void ShowHiddenLevels() {
     });
 }
 
+int IntAt(const void* obj, const char* name, ue3::Property* p) {
+    std::int32_t value = 0;
+    if (!ue3::FindProperty(obj, name, p)) return -1;
+    ue3::ReadBytes(static_cast<const std::uint8_t*>(obj) + p->offset, &value, sizeof(value));
+    return value;
+}
+
+// "Return to Soldier's Field" (BW_BackUpElevator, S_BW2_Quests): the game saves there when Booker
+// crosses XTriggerVolume_0 (a thin wall across Soldier's Field) on his way back from the Hall of
+// Heroes: SeqEvent_Touch_1 (MaxTriggerCount 1) -> BW_WorldState_DPV == 2? -> XSeqAct_Checkpoint_1.
+// But Booker already crosses it on his way to the Hall of Heroes, while the state is 1: the test
+// fails, the event is used up, and the save keeps its TriggerCount, so that checkpoint never
+// happens, even in the base game. Found with the debug bridge: TriggerCount 1 and SeqCond_CompareInt
+// ValueA 1 on the way back, state 2; with TriggerCount set to 0, crossing it saved there. The mod
+// re-arms the event while the state is 2 and that checkpoint hasn't run.
+void RearmReturnToSoldiersField(const void* controller) {
+    static DWORD next = 0;
+    const DWORD now = GetTickCount();
+    if (static_cast<int>(now - next) < 0) return;
+    next = now + 1000;
+    int state = 0;
+    if (!savedata::Get(controller, L"BW_WorldState_DPV", &state) || state != 2) return;
+    static const void* checkpointCls = nullptr;
+    static const void* touchCls = nullptr;
+    if (!ue3::IsObject(checkpointCls)) checkpointCls = ue3::FindClass("XSeqAct_Checkpoint");
+    if (!ue3::IsObject(touchCls)) touchCls = ue3::FindClass("SeqEvent_Touch");
+    bool loaded = false, reached = false;
+    ue3::ForEachObjectOfClass(checkpointCls, [&](int, const void* action) {
+        ue3::Property name, count;
+        std::int32_t fname = 0;
+        if (!StartsWith(ue3::PathName(action), "S_BW2_Quests.") ||
+            !ue3::FindProperty(action, "CheckpointDisplayInfoStructLookupName", &name) ||
+            !ue3::ReadBytes(static_cast<const std::uint8_t*>(action) + name.offset, &fname, sizeof(fname)) ||
+            ue3::NameString(fname) != "BW_BackUpElevator") {
+            return;
+        }
+        loaded = true;
+        reached = reached || IntAt(action, "ActivateCount", &count) > 0;
+    });
+    if (!loaded || reached) return;
+    ue3::ForEachObjectOfClass(touchCls, [&](int, const void* event) {
+        ue3::Property originator, triggers, max;
+        if (!StartsWith(ue3::PathName(event), "S_BW2_Quests.") ||
+            !ue3::FindProperty(event, "Originator", &originator) ||
+            ue3::ObjectName(ue3::ObjectField(event, originator)) != "XTriggerVolume_0") {
+            return;
+        }
+        const int limit = IntAt(event, "MaxTriggerCount", &max);
+        if (limit <= 0 || IntAt(event, "TriggerCount", &triggers) < limit) return;
+        std::string err;
+        if (ue3::WriteValue(event, triggers, "0", &err)) {
+            Log("collect: Return to Soldier's Field re-armed (its trigger was used up on the way in)");
+        } else {
+            Log("collect: Return to Soldier's Field can't be re-armed: %s", err.c_str());
+        }
+    });
+}
+
 }  // namespace
 
 void Tick(const void* controller) {
@@ -246,6 +305,7 @@ void Tick(const void* controller) {
     WatchSiphon();
     WatchCheckpoints();
     ShowHiddenLevels();
+    RearmReturnToSoldiersField(controller);
     static DWORD next = 0;
     // State 4 also means hidden by the game (bStartHidden, Season Pass, loading a save...): only a
     // change to 4 with Booker next to the object is a pickup.
