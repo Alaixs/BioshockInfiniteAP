@@ -35,7 +35,8 @@ Chapter menu by default (`chapters`), or every autosave checkpoint of the story 
 
 With `randomize_vigors`, Murder of Crows, Bucking Bronco, Charge, Undertow and Return to Sender are
 Archipelago items: the first time the game gives you one (bottle, enemy drop...), Booker doesn't
-drink it (no animation, no tutorial) and its location is checked. You get the Vigor as soon as you
+drink it (no animation, no tutorial) and its location is checked, even if you already received
+that Vigor. You get the Vigor as soon as you
 receive its item, in any level, straight into your Vigors (no animation, no tutorial). Possession,
 Shock Jockey and Devil's Kiss are given by the story as usual: it needs them (the way out of Raffle
 Square only opens once Booker has drunk Devil's Kiss).
