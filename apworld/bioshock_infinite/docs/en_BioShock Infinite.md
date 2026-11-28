@@ -27,7 +27,8 @@ taken and its Archipelago item is sent instead.
 
 Gear packages (hats, shirts, pants and boots) are locations with `gear_areas`: picking one up
 takes it without giving you a piece and sends its Archipelago item. The 10 Season Pass packages of
-the Blue Ribbon are not locations.
+the Blue Ribbon are not locations. Gear - Harmony Lane is upstairs in the shop of the Beyond
+Redemption Voxophone: the original game hides it, so guides don't list it, but the mod shows it.
 
 With `checkpoint_checks`, reaching a point of the story sends a check: the 37 chapters of the Load
 Chapter menu by default (`chapters`), or every autosave checkpoint of the story (`all`, 99).

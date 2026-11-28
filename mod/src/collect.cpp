@@ -190,12 +190,62 @@ void WatchCheckpoints() {
     for (auto it = sent.begin(); it != sent.end();) it = alive.count(*it) ? std::next(it) : sent.erase(it);
 }
 
+// Level packages that the game keeps loaded but hidden where their objects stand: made visible.
+// S_EMP_BombStore_Loot ("BombStore" streaming group, Downtown Emporia) holds the Gear package
+// upstairs in the shop of the Beyond Redemption Voxophone ("Gear - Harmony Lane"), plus a wine
+// bottle and two carbines. Upstairs, the streaming volumes of S_EMP2_Streaming only show the
+// "BombStoreTransition" group, so the package can be neither seen nor used, even in the base game.
+// Found with the debug bridge: there its LevelStreamingKismet had bShouldBeLoaded 1 and
+// bShouldBeVisible 0; setting bShouldBeVisible to 1 shows the package on the floor, usable.
+// Only a loaded level is shown: a visible one is loaded too.
+constexpr const char* kShownLevels[] = {"S_EMP_BombStore_Loot"};
+
+bool BoolAt(const void* obj, const ue3::Property& p) {
+    std::uint32_t bits = 0;
+    return ue3::ReadBytes(static_cast<const std::uint8_t*>(obj) + p.offset, &bits, sizeof(bits)) &&
+           (bits & p.boolMask) != 0;
+}
+
+void ShowHiddenLevels() {
+    static DWORD next = 0;
+    const DWORD now = GetTickCount();
+    if (static_cast<int>(now - next) < 0) return;
+    next = now + 1000;
+    static const void* cls = nullptr;
+    if (!ue3::IsObject(cls)) cls = ue3::FindClass("LevelStreamingKismet");
+    ue3::ForEachObjectOfClass(cls, [&](int, const void* level) {
+        ue3::Property name, loaded, visible;
+        std::int32_t fname = 0;
+        if (!ue3::FindProperty(level, "PackageName", &name) ||
+            !ue3::ReadBytes(static_cast<const std::uint8_t*>(level) + name.offset, &fname, sizeof(fname))) {
+            return;
+        }
+        const std::string package = ue3::NameString(fname);
+        if (std::none_of(std::begin(kShownLevels), std::end(kShownLevels),
+                         [&](const char* shown) { return package == shown; })) {
+            return;
+        }
+        if (!ue3::FindProperty(level, "bShouldBeLoaded", &loaded) ||
+            !ue3::FindProperty(level, "bShouldBeVisible", &visible) || !BoolAt(level, loaded) ||
+            BoolAt(level, visible)) {
+            return;
+        }
+        std::string err;
+        if (ue3::WriteValue(level, visible, "1", &err)) {
+            Log("collect: level %s loaded but hidden, made visible", package.c_str());
+        } else {
+            Log("collect: level %s can't be made visible: %s", package.c_str(), err.c_str());
+        }
+    });
+}
+
 }  // namespace
 
 void Tick(const void* controller) {
     EnsureOpenSearchHook();
     WatchSiphon();
     WatchCheckpoints();
+    ShowHiddenLevels();
     static DWORD next = 0;
     // State 4 also means hidden by the game (bStartHidden, Season Pass, loading a save...): only a
     // change to 4 with Booker next to the object is a pickup.

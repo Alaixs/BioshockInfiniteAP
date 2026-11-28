@@ -20,6 +20,8 @@
 // 4 m): "event infusion <id>".
 //
 // Gear package: Pickup_Gear_* archetype, same id. Picked up: "event gear <id>".
+// "Gear - Harmony Lane" (S_EMP_BombStore_Loot) stands in a level that the game keeps loaded but
+// hidden where it is, even in the base game: the mod makes that level visible.
 //
 // Autosave checkpoint (XSeqAct_Checkpoint): "event checkpoint <step>". Songbird destroys the Siphon
 // ("TowerDestroyed" in S_CHU_LizTower_Gam): "event goal siphon".
